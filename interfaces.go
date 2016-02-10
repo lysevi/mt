@@ -1,4 +1,4 @@
-package common
+package mt
 
 type MeasWriter interface {
 	New(size int64)

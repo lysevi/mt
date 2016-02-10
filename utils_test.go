@@ -1,7 +1,6 @@
-package common
+package mt
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -43,14 +42,5 @@ func TestMeasFlagFltr(t *testing.T) {
 
 	if !flagFltr(1, 1) {
 		t.Error("flagFltr(1,1)")
-	}
-}
-
-func TestMeas2String(t *testing.T) {
-	m := NewMeas(0, 1, 2, 3)
-	s := fmt.Sprintf("%v", m)
-
-	if len(s) == 0 {
-		t.Error("meas.String==0")
 	}
 }
