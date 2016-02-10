@@ -32,6 +32,10 @@ func TestMeasIdFltr(t *testing.T) {
 }
 
 func TestMeasFlagFltr(t *testing.T) {
+	if !flagFltr(0, 1) {
+		t.Error("!flagFltr(0,1)")
+	}
+
 	if flagFltr(2, 1) {
 		t.Error("flagFltr(2,1)")
 	}

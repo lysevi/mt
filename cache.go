@@ -1,5 +1,9 @@
 package mt
 
+import (
+	_ "fmt"
+)
+
 type LinearCache struct {
 	MeasStorage
 	meases []Meas
@@ -51,14 +55,29 @@ func (c LinearCache) ReadAll() []Meas {
 	return c.meases[:c.pos]
 }
 func (c LinearCache) Read(ids []Id, from, to Time) []Meas {
-	return make([]Meas, 0, 0)
+	res := make([]Meas, 0, 0)
+
+	for i := int64(0); i < c.pos; i++ {
+		v := &c.meases[i]
+		if idFltr(ids, v.Id) && inTimeInterval(from, to, v.Tstamp) {
+			res = append(res, *v)
+		}
+	}
+	return res
 }
 func (c LinearCache) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
-	return make([]Meas, 0, 0)
+	res := make([]Meas, 0, 0)
+	for i := int64(0); i < c.pos; i++ {
+		v := &c.meases[i]
+		if idFltr(ids, v.Id) && inTimeInterval(from, to, v.Tstamp) && flagFltr(flg, v.Flg) {
+			res = append(res, *v)
+		}
+	}
+	return res
 }
 func (c LinearCache) TimePoint(ids []Id, time Time) []Meas {
-	return make([]Meas, 0, 0)
+	return c.Read(ids, 0, time)
 }
 func (c LinearCache) TimePointFltr(ids []Id, flg Flag, time Time) []Meas {
-	return make([]Meas, 0, 0)
+	return c.ReadFltr(ids, flg, 0, time)
 }

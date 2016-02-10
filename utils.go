@@ -14,7 +14,10 @@ func idFltr(ids []Id, idV Id) bool {
 }
 
 func flagFltr(fltrFlag, measFlag Flag) bool {
-	return fltrFlag == 0 || fltrFlag == measFlag
+	if fltrFlag == Flag(0) {
+		return true
+	}
+	return fltrFlag == measFlag
 }
 
 func inTimeInterval(from, to, tstamp Time) bool {

@@ -61,7 +61,7 @@ func checkStorage(t *testing.T, storage MeasStorage, from, to, step Time) {
 	total_count := 0
 	for i := from; i < to; i += step {
 		m.Id = Id(i)
-		m.Flg = Flag(to)
+		m.Flg = Flag(i)
 		m.Tstamp = Time(i)
 		storage.Add(m)
 		total_count++
@@ -78,7 +78,7 @@ func checkStorage(t *testing.T, storage MeasStorage, from, to, step Time) {
 		t.Error("len(all)!=total_count", len(all), total_count)
 	}
 
-	ids = append(ids, 1)
+	ids = append(ids, Id(from+step))
 	fltr_res := storage.ReadFltr(ids, 0, from, to)
 	if len(fltr_res) != 1 {
 		t.Error("len(fltr_res)!=1", len(fltr_res))
@@ -95,7 +95,13 @@ func checkStorage(t *testing.T, storage MeasStorage, from, to, step Time) {
 		t.Error("timepoint: len(all)!=total_count", len(all), total_count)
 	}
 
-	fltr_res = storage.TimePoint(ids, to)
+	var emptyIDs []Id
+	fltr_res = storage.TimePointFltr(emptyIDs, 0, to)
+	if len(fltr_res) != total_count {
+		t.Error("len(fltr_res)!=total_count", len(fltr_res))
+	}
+
+	fltr_res = storage.TimePointFltr(emptyIDs, Flag(from+step), to)
 	if len(fltr_res) != 1 {
 		t.Error("len(fltr_res)!=1", len(fltr_res))
 	}

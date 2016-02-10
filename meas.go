@@ -25,7 +25,7 @@ func NewMeas(Id Id, Tstamp Time, Value int64, Flg Flag) Meas {
 }
 
 func (m *Meas) String() string {
-	return fmt.Sprintf("{%v %v %v %v}", m.Id, m.Tstamp, m.Flg, m.Value)
+	return fmt.Sprintf("{i%v t%v f%v v%v}", m.Id, m.Tstamp, m.Flg, m.Value)
 }
 
 func measEqual(m1, m2 Meas) bool {
