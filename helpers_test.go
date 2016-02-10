@@ -57,6 +57,16 @@ func checkStorageAddRange(t *testing.T, storage MeasWriter) {
 }
 
 func checkStorage(t *testing.T, storage MeasStorage, from, to, step Time) {
+	checkAll := func(res []Meas, msg string) {
+		i := from
+		for _, m := range res {
+			if m.Id != Id(i) || m.Flg != Flag(i) || m.Tstamp != Time(i) {
+				t.Errorf("msg: ", m)
+			}
+			i += step
+		}
+	}
+
 	m := Meas{}
 	total_count := 0
 	for i := from; i < to; i += step {
@@ -72,14 +82,7 @@ func checkStorage(t *testing.T, storage MeasStorage, from, to, step Time) {
 		t.Error("len(all)!=total_count", len(all), total_count)
 	}
 
-	i := from
-	for _, m := range all {
-		if m.Id != Id(i) || m.Flg != Flag(i) || m.Tstamp != Time(i) {
-			t.Errorf("readAll error: ", m)
-		}
-		i += step
-
-	}
+	checkAll(all, "readAll error: ")
 
 	var ids []Id
 	all = storage.Read(ids, from, to)
@@ -87,14 +90,7 @@ func checkStorage(t *testing.T, storage MeasStorage, from, to, step Time) {
 		t.Error("len(all)!=total_count", len(all), total_count)
 	}
 
-	i = from
-	for _, m := range all {
-		if m.Id != Id(i) || m.Flg != Flag(i) || m.Tstamp != Time(i) {
-			t.Errorf("Read error: ", m)
-		}
-		i += step
-
-	}
+	checkAll(all, "read error: ")
 
 	ids = append(ids, Id(from+step))
 	fltr_res := storage.ReadFltr(ids, 0, from, to)
@@ -117,14 +113,7 @@ func checkStorage(t *testing.T, storage MeasStorage, from, to, step Time) {
 		t.Error("timepoint: len(all)!=total_count", len(all), total_count)
 	}
 
-	i = from
-	for _, m := range all {
-		if m.Id != Id(i) || m.Flg != Flag(i) || m.Tstamp != Time(i) {
-			t.Errorf("TimePoint error: ", m)
-		}
-		i += step
-
-	}
+	checkAll(all, "TimePoint error: ")
 
 	var emptyIDs []Id
 	fltr_res = storage.TimePointFltr(emptyIDs, 0, to)
@@ -132,17 +121,15 @@ func checkStorage(t *testing.T, storage MeasStorage, from, to, step Time) {
 		t.Error("len(fltr_res)!=total_count", len(fltr_res))
 	}
 
-	i = from
-	for _, m := range all {
-		if m.Id != Id(i) || m.Flg != Flag(i) || m.Tstamp != Time(i) {
-			t.Errorf("TimePoint error: ", m)
-		}
-		i += step
+	checkAll(all, "TimePointFltr error: ")
 
-	}
-
-	fltr_res = storage.TimePointFltr(emptyIDs, Flag(from+step), to)
+	magicFlag := Flag(from + step)
+	fltr_res = storage.TimePointFltr(emptyIDs, magicFlag, to)
 	if len(fltr_res) != 1 {
 		t.Error("len(fltr_res)!=1", len(fltr_res))
+	}
+
+	if fltr_res[0].Flg != magicFlag {
+		t.Error("TimePointFltr: ", fltr_res)
 	}
 }
