@@ -6,25 +6,45 @@ import (
 
 type LinearCache struct {
 	common.MeasStorage
+	meases []common.Meas
+	pos    int64
+	sz     int64
 }
 
-func NewLinearCache() *LinearCache {
-	return &LinearCache{}
+func NewLinearCache(sz int64) *LinearCache {
+	res := &LinearCache{}
+	res.meases = make([]common.Meas, sz, sz)
+	res.pos = 0
+	res.sz = sz
+	return res
 }
 
 func (c *LinearCache) Add(m common.Meas) bool {
+	if c.pos < c.sz {
+		c.meases[c.pos] = m
+		c.pos++
+		return true
+	}
 	return false
 }
 
 func (c *LinearCache) Add_range(m []common.Meas) int64 {
-	return 0
+	var res int64 = 0
+	for _, v := range m {
+		add_res := c.Add(v)
+		if !add_res {
+			break
+		}
+		res++
+	}
+	return res
 }
 
 func (c *LinearCache) Cap() int64 {
-	return 0
+	return c.sz - c.pos
 }
 func (c *LinearCache) IsFull() bool {
-	return false
+	return c.sz == c.pos
 }
 
 func (c *LinearCache) Close() {
@@ -32,7 +52,7 @@ func (c *LinearCache) Close() {
 }
 
 func (c LinearCache) ReadAll() []common.Meas {
-	return make([]common.Meas, 0, 0)
+	return c.meases[:c.pos]
 }
 func (c LinearCache) Read(ids []common.Id, from, to common.Time) []common.Meas {
 	return make([]common.Meas, 0, 0)
