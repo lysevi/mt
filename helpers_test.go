@@ -72,16 +72,38 @@ func checkStorage(t *testing.T, storage MeasStorage, from, to, step Time) {
 		t.Error("len(all)!=total_count", len(all), total_count)
 	}
 
+	i := from
+	for _, m := range all {
+		if m.Id != Id(i) || m.Flg != Flag(i) || m.Tstamp != Time(i) {
+			t.Errorf("readAll error: ", m)
+		}
+		i += step
+
+	}
+
 	var ids []Id
 	all = storage.Read(ids, from, to)
 	if len(all) != total_count {
 		t.Error("len(all)!=total_count", len(all), total_count)
 	}
 
+	i = from
+	for _, m := range all {
+		if m.Id != Id(i) || m.Flg != Flag(i) || m.Tstamp != Time(i) {
+			t.Errorf("Read error: ", m)
+		}
+		i += step
+
+	}
+
 	ids = append(ids, Id(from+step))
 	fltr_res := storage.ReadFltr(ids, 0, from, to)
 	if len(fltr_res) != 1 {
 		t.Error("len(fltr_res)!=1", len(fltr_res))
+	} else {
+		if fltr_res[0].Id != ids[0] {
+			t.Error("ReadFltr: ", fltr_res[0])
+		}
 	}
 
 	fltr_res = storage.ReadFltr(ids, Flag(to+1), from, to)
@@ -95,10 +117,28 @@ func checkStorage(t *testing.T, storage MeasStorage, from, to, step Time) {
 		t.Error("timepoint: len(all)!=total_count", len(all), total_count)
 	}
 
+	i = from
+	for _, m := range all {
+		if m.Id != Id(i) || m.Flg != Flag(i) || m.Tstamp != Time(i) {
+			t.Errorf("TimePoint error: ", m)
+		}
+		i += step
+
+	}
+
 	var emptyIDs []Id
 	fltr_res = storage.TimePointFltr(emptyIDs, 0, to)
 	if len(fltr_res) != total_count {
 		t.Error("len(fltr_res)!=total_count", len(fltr_res))
+	}
+
+	i = from
+	for _, m := range all {
+		if m.Id != Id(i) || m.Flg != Flag(i) || m.Tstamp != Time(i) {
+			t.Errorf("TimePoint error: ", m)
+		}
+		i += step
+
 	}
 
 	fltr_res = storage.TimePointFltr(emptyIDs, Flag(from+step), to)
