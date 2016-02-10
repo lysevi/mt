@@ -55,15 +55,7 @@ func (c LinearCache) ReadAll() []Meas {
 	return c.meases[:c.pos]
 }
 func (c LinearCache) Read(ids []Id, from, to Time) []Meas {
-	res := make([]Meas, 0, 0)
-
-	for i := int64(0); i < c.pos; i++ {
-		v := &c.meases[i]
-		if idFltr(ids, v.Id) && inTimeInterval(from, to, v.Tstamp) {
-			res = append(res, *v)
-		}
-	}
-	return res
+	return c.ReadFltr(ids, 0, from, to)
 }
 func (c LinearCache) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
 	res := make([]Meas, 0, 0)
