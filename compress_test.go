@@ -254,7 +254,7 @@ func TestCompressTimeRead(t *testing.T) {
 	}
 
 	{ // D= [-63, 64],
-		var t2 = Time(64 - t1)
+		var t2 = Time(64)
 		cblock := NewCompressedBlock()
 		cblock.StartTime = 1
 
@@ -275,7 +275,7 @@ func TestCompressTimeRead(t *testing.T) {
 	}
 
 	{ // D= [-255, 256],
-		var t2 = Time(t1 + 100)
+		var t2 = Time(255)
 		cblock := NewCompressedBlock()
 		cblock.StartTime = 1
 
@@ -296,7 +296,7 @@ func TestCompressTimeRead(t *testing.T) {
 	}
 
 	{ // D= [-2047, 2048]
-		var t2 = Time(t1 + 997)
+		var t2 = Time(2048)
 		cblock := NewCompressedBlock()
 		cblock.StartTime = 1
 
@@ -317,7 +317,7 @@ func TestCompressTimeRead(t *testing.T) {
 	}
 
 	{ // D= > 2048
-		var t2 = Time(t1 + 2048)
+		var t2 = Time(4294967295)
 		cblock := NewCompressedBlock()
 		cblock.StartTime = 1
 
