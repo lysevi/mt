@@ -26,6 +26,9 @@ func NewCompressedBlock() *CompressedBlock {
 	res.StartTime = 0
 	res.byteNum = 0
 	res.bitNum = MAX_BIT
+	for i := 0; i < MAX_BLOCK_SIZE; i++ {
+		res.data[i] = 0
+	}
 	return &res
 }
 
@@ -229,13 +232,15 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 	}
 
 	res2 := getBit(*cur_byte, c.bitNum)
+
+	fmt.Println("res2: ", res1, res2, c.data[c.byteNum])
 	c.incBit()
-	//	fmt.Println("!>>>> ", res1, res2)
 	if res1 == 1 && res2 == 0 {
 		fmt.Println("R -63 63")
 		res := byte(0)
 		for i := uint8(0); i <= 5; i++ {
 			cur_byte = &c.data[c.byteNum]
+
 			time_bit := getBit(*cur_byte, c.bitNum)
 			c.incBit()
 			res = setBit(res, i, time_bit)
@@ -245,7 +250,7 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 
 	res3 := getBit(*cur_byte, c.bitNum)
 	c.incBit()
-	fmt.Println("res: ", res1, res2, res3)
+	fmt.Println("res3: ", res1, res2, res3)
 	if res1 == 1 && res2 == 1 && res3 == 0 {
 		fmt.Println("R -255 255")
 		res := byte(0)
@@ -260,7 +265,7 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 
 	res4 := getBit(*cur_byte, c.bitNum)
 	c.incBit()
-	fmt.Println("res: ", res1, res2, res3, res4)
+	fmt.Println("res4: ", res1, res2, res3, res4)
 	if res1 == 1 && res2 == 1 && res3 == 1 && res4 == 0 {
 		fmt.Println("R [-2047, 2048]")
 		b := []byte{0, 0, 0, 0, 0, 0, 0, 0}
