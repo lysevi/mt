@@ -213,3 +213,42 @@ func TestCompressTimeAddSecond(t *testing.T) {
 		}
 	}
 }
+
+func TestCompressTimeRead(t *testing.T) {
+	var t1 = Time(256)
+	{
+		cblock := NewCompressedBlock()
+		cblock.StartTime = 1
+
+		cblock.compressTime(t1)
+		cblock.bitNum = 0
+		cblock.byteNum = 0
+
+		tm := cblock.readTime()
+		if tm != t1 {
+			t.Error("tm!=t1", tm, t1)
+		}
+	}
+
+	{
+		var t2 = Time(t1)
+		cblock := NewCompressedBlock()
+		cblock.StartTime = 1
+
+		cblock.compressTime(t1)
+		cblock.compressTime(t2)
+		cblock.bitNum = 0
+		cblock.byteNum = 0
+
+		tm := cblock.readTime()
+		if tm != t1 {
+			t.Error("tm!=t1", tm, t1)
+		}
+
+		tm = cblock.readTime()
+		if tm != t2 {
+			t.Error("tm!=t2", tm, t2)
+		}
+	}
+
+}

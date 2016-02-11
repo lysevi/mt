@@ -207,6 +207,22 @@ func (c *CompressedBlock) d_bigger(D int64) {
 	}
 }
 
+func (c *CompressedBlock) readTime() Time {
+	if c.byteNum == 0 {
+		b := c.data[0:8]
+		buf := bytes.NewBuffer(b)
+		var readed_delta Time
+		binary.Read(buf, binary.LittleEndian, &readed_delta)
+		c.byteNum = 9
+		return c.StartTime + readed_delta
+	}
+	cur_byte := &c.data[c.byteNum]
+	res1 := getBit(*cur_byte, c.bitNum)
+	if res1 == 0 {
+		return 0
+	}
+	return 0
+}
 func (c *CompressedBlock) incByte() {
 	c.byteNum++
 }
