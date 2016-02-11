@@ -310,6 +310,9 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 }
 func (c *CompressedBlock) incByte() {
 	c.byteNum++
+	if c.byteNum >= MAX_BLOCK_SIZE {
+		panic("out of bound")
+	}
 }
 
 func (c *CompressedBlock) incBit() {
