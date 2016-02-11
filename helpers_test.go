@@ -51,7 +51,7 @@ func checkStorageAddRange(t *testing.T, storage MeasWriter) {
 	m := make([]Meas, twice, twice)
 
 	writed := storage.Add_range(m)
-	if writed <= size {
+	if writed < size {
 		t.Errorf("writed<=size, %d %d", writed, size)
 	}
 }
