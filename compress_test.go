@@ -294,4 +294,25 @@ func TestCompressTimeRead(t *testing.T) {
 			t.Error("tm!=t2", tm, t2)
 		}
 	}
+
+	{ // D= [-2047, 2048]
+		var t2 = Time(t1 + 997)
+		cblock := NewCompressedBlock()
+		cblock.StartTime = 1
+
+		cblock.compressTime(t1)
+		cblock.compressTime(t2)
+		cblock.bitNum = 0
+		cblock.byteNum = 0
+
+		tm := cblock.readTime(0)
+		if tm != t1 {
+			t.Error("tm!=t1", tm, t1)
+		}
+
+		tm = cblock.readTime(tm)
+		if tm != t2 {
+			t.Error("tm!=t2", tm, t2)
+		}
+	}
 }

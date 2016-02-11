@@ -94,15 +94,15 @@ func (c *CompressedBlock) d_63(D int64) {
 	*cur_byte = setBit(*cur_byte, c.bitNum, 0)
 	c.incBit()
 
-	fmt.Println("[-63;64] D=", D)
-	fmt.Println("[-63;64]   >>>! ", *cur_byte, c.bitNum, c.byteNum)
+	//	fmt.Println("[-63;64] D=", D)
+	//	fmt.Println("[-63;64]   >>>! ", *cur_byte, c.bitNum, c.byteNum)
 
 	bite_value := byte(D)
 	for i := uint8(0); i <= 5; i++ {
 		cur_byte = &c.data[c.byteNum]
 		time_bit := getBit(bite_value, i)
 		*cur_byte = setBit(*cur_byte, c.bitNum, time_bit)
-		fmt.Println("[-63;64] >  ", i, *cur_byte, c.bitNum, time_bit)
+		//		fmt.Println("[-63;64] >  ", i, *cur_byte, c.bitNum, time_bit)
 		c.incBit()
 	}
 }
@@ -118,7 +118,7 @@ func (c *CompressedBlock) d_256(D int64) {
 	*cur_byte = setBit(*cur_byte, c.bitNum, 1)
 	c.incBit()
 
-	fmt.Println("  >>> ", *cur_byte, c.bitNum, c.byteNum)
+	//	fmt.Println("  >>> ", *cur_byte, c.bitNum, c.byteNum)
 	cur_byte = &c.data[c.byteNum]
 	*cur_byte = setBit(*cur_byte, c.bitNum, 0)
 	c.incBit()
@@ -129,7 +129,6 @@ func (c *CompressedBlock) d_256(D int64) {
 		cur_byte = &c.data[c.byteNum]
 		time_bit := getBit(bite_value, i)
 		*cur_byte = setBit(*cur_byte, c.bitNum, time_bit)
-		fmt.Println(">  ", i, *cur_byte, c.bitNum, time_bit, c.byteNum)
 		c.incBit()
 	}
 }
@@ -219,18 +218,18 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 	}
 	cur_byte := &c.data[c.byteNum]
 	res1 := getBit(*cur_byte, c.bitNum)
-	fmt.Println("! ", res1)
+	//	fmt.Println("! ", res1)
 	c.incBit()
 
 	if res1 == 0 {
-		fmt.Println("zero !>>>> ", res1)
+		//		fmt.Println("zero !>>>> ", res1)
 		return prev_readed
 
 	}
 
 	res2 := getBit(*cur_byte, c.bitNum)
 	c.incBit()
-	fmt.Println("!>>>> ", res1, res2)
+	//	fmt.Println("!>>>> ", res1, res2)
 	if res1 == 1 && res2 == 0 {
 		fmt.Println("-63 63")
 		res := byte(0)
@@ -239,7 +238,6 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 			time_bit := getBit(*cur_byte, c.bitNum)
 			c.incBit()
 			res = setBit(res, i, time_bit)
-			fmt.Println(res, i, time_bit)
 		}
 		return prev_readed + Time(res)
 	}
@@ -255,9 +253,30 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 			time_bit := getBit(*cur_byte, c.bitNum)
 			c.incBit()
 			res = setBit(res, i, time_bit)
-			fmt.Println(res, i, time_bit)
 		}
 		return prev_readed + Time(res)
+	}
+
+	res4 := getBit(*cur_byte, c.bitNum)
+	c.incBit()
+	fmt.Println("res: ", res1, res2, res3, res4)
+	if res1 == 1 && res2 == 1 && res3 == 1 && res4 == 0 {
+		fmt.Println("[-2047, 2048]")
+		b := []byte{0, 0, 0}
+		for b_num := 0; b_num < 3; b_num++ {
+			res := &b[b_num]
+			for i := uint8(0); i <= 7; i++ {
+				cur_byte = &c.data[c.byteNum]
+				time_bit := getBit(*cur_byte, c.bitNum)
+				c.incBit()
+				*res = setBit(*res, i, time_bit)
+			}
+		}
+		fmt.Println(b)
+		buf := bytes.NewBuffer(b)
+		var readed_delta Time
+		binary.Read(buf, binary.LittleEndian, &readed_delta)
+		return prev_readed + Time(readed_delta)
 	}
 	fmt.Println("END ")
 	return 0
