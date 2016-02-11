@@ -1,14 +1,15 @@
 package mt
 
 import (
-	"bytes"
-	"encoding/binary"
+	_ "bytes"
+	_ "encoding/binary"
 	"fmt"
 	"testing"
 )
 
 var _ = fmt.Sprintf(" ")
 
+/*
 func TestCompressTimePanic(t *testing.T) {
 
 	defer func() {
@@ -141,8 +142,8 @@ func TestCompressTimeAddSecond(t *testing.T) {
 		cblock.compressTime(t1)
 		cblock.compressTime(t2)
 
-		if cblock.byteNum != 8+3 {
-			t.Error("2 cblock.byteNum!=8+3 ", cblock.byteNum, 8+3)
+		if cblock.byteNum != 8+4 {
+			t.Error("2 cblock.byteNum!=8+4 ", cblock.byteNum, 8+4)
 		}
 
 		if !checkBit(cblock.data[9], MAX_BIT) {
@@ -166,7 +167,7 @@ func TestCompressTimeAddSecond(t *testing.T) {
 			t.Error("cblock.data[9]!=239", cblock.data[9])
 		}
 
-		if cblock.data[10] != 248 {
+		if cblock.data[10] != 254 {
 			t.Error("cblock.data[9]!=248", cblock.data[10])
 		}
 	}
@@ -180,8 +181,8 @@ func TestCompressTimeAddSecond(t *testing.T) {
 		cblock.compressTime(t1)
 		cblock.compressTime(t2)
 
-		if cblock.byteNum != 8+4 {
-			t.Error("2 cblock.byteNum!=8+4 ", cblock.byteNum, 8+4)
+		if cblock.byteNum != 8+5 {
+			t.Error("2 cblock.byteNum!=8+4 ", cblock.byteNum, 8+5)
 		}
 
 		if !checkBit(cblock.data[9], MAX_BIT) {
@@ -199,18 +200,18 @@ func TestCompressTimeAddSecond(t *testing.T) {
 		if !checkBit(cblock.data[9], MAX_BIT-3) {
 			t.Error("2 checkBit(cblock.data[0],MAX_BIT-3)", cblock.data[9])
 		}
-		//1111 0101  0111 0111 1011 0000 0000
+		//1111 0101  0101 1101 1011 1101 1011
 		//|----245-|   252
 		if cblock.data[9] != 245 {
 			t.Error("cblock.data[9]!=245", cblock.data[9])
 		}
 
-		if cblock.data[10] != 119 {
-			t.Error("cblock.data[9]!=119", cblock.data[10])
+		if cblock.data[10] != 93 {
+			t.Error("cblock.data[10]!=93", cblock.data[10])
 		}
 
-		if cblock.data[11] != 176 {
-			t.Error("cblock.data[9]!=248", cblock.data[10])
+		if cblock.data[11] != 219 {
+			t.Error("cblock.data[11]!=219", cblock.data[11])
 		}
 	}
 }
@@ -313,6 +314,71 @@ func TestCompressTimeRead(t *testing.T) {
 		tm = cblock.readTime(tm)
 		if tm != t2 {
 			t.Error("tm!=t2", tm, t2)
+		}
+	}
+
+	{ // D= > 2048
+		var t2 = Time(t1 + 2048)
+		cblock := NewCompressedBlock()
+		cblock.StartTime = 1
+
+		cblock.compressTime(t1)
+		cblock.compressTime(t2)
+		cblock.bitNum = 0
+		cblock.byteNum = 0
+
+		tm := cblock.readTime(0)
+		if tm != t1 {
+			t.Error("tm!=t1", tm, t1)
+		}
+
+		tm = cblock.readTime(tm)
+		if tm != t2 {
+			t.Error("tm!=t2", tm, t2)
+		}
+	}
+
+}
+*/
+func TestCompressTimeManyAppends(t *testing.T) {
+	cblock := NewCompressedBlock()
+	cblock.StartTime = 1
+
+	deltaI := Time(1)
+	times := []Time{}
+
+	for i := Time(1); i < 10000; i += deltaI {
+		fmt.Println("i:", i)
+		//		fmt.Println(cblock.data[0:150])
+		times = append(times, i)
+		cblock.compressTime(i)
+
+		//		old_byte := cblock.byteNum
+		//		old_bit := cblock.bitNum
+		//		readed_time := Time(0)
+		//		for j, v := range times {
+		//			cblock.bitNum = 0
+		//			cblock.byteNum = 0
+		//			readed_time = cblock.readTime(readed_time)
+		//			if readed_time != v {
+		//				t.Error("readed_time!=v ", readed_time, v, " j=", j, times)
+		//				return
+		//			}
+
+		//		}
+		//		cblock.bitNum = old_bit
+		//		cblock.byteNum = old_byte
+		//deltaI += 25
+	}
+	fmt.Println("count: ", len(times), times)
+	cblock.bitNum = 0
+	cblock.byteNum = 0
+	readed_time := Time(0)
+	for i, v := range times {
+
+		readed_time = cblock.readTime(readed_time)
+		if readed_time != v {
+			t.Error("readed_time!=v ", readed_time, v, " i=", i)
 		}
 	}
 }
