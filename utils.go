@@ -28,3 +28,20 @@ func inTimeInterval(from, to, tstamp Time) bool {
 		return false
 	}
 }
+
+func setBit(v uint8, bitNum uint8, bitValue uint8) byte {
+	if bitValue == 1 {
+		return v | (1 << bitNum)
+	} else {
+		v &^= (1 << bitNum)
+		return v
+	}
+}
+
+func getBit(v byte, bitNum uint8) uint8 {
+	return ((v >> bitNum) & 1)
+}
+
+func checkBit(v byte, bitNum uint8) bool {
+	return (getBit(v, bitNum)) == 1
+}
