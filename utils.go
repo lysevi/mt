@@ -1,9 +1,5 @@
 package mt
 
-import (
-	"unsafe"
-)
-
 func idFltr(ids []Id, idV Id) bool {
 	if len(ids) == 0 {
 		return true
@@ -31,9 +27,4 @@ func inTimeInterval(from, to, tstamp Time) bool {
 	} else {
 		return false
 	}
-}
-
-func getPtr(m []byte, num uint64, szOfElement uint64) *tstHeader {
-	offset := num * szOfElement
-	return (*tstHeader)(unsafe.Pointer(&m[offset]))
 }

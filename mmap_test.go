@@ -44,6 +44,11 @@ func openAndMap(t *testing.T) mmap.MMap {
 	return mmaped
 }
 
+func getPtr(m []byte, num uint64, szOfElement uint64) *tstHeader {
+	offset := num * szOfElement
+	return (*tstHeader)(unsafe.Pointer(&m[offset]))
+}
+
 func TestMap(t *testing.T) {
 	const magicOne int = 1171
 	const magicTwo int64 = 1271
