@@ -1,15 +1,14 @@
 package mt
 
 import (
-	_ "bytes"
-	_ "encoding/binary"
+	"bytes"
+	"encoding/binary"
 	"fmt"
 	"testing"
 )
 
 var _ = fmt.Sprintf(" ")
 
-/*
 func TestCompressTimePanic(t *testing.T) {
 
 	defer func() {
@@ -339,46 +338,34 @@ func TestCompressTimeRead(t *testing.T) {
 	}
 
 }
-*/
+
 func TestCompressTimeManyAppends(t *testing.T) {
 	cblock := NewCompressedBlock()
 	cblock.StartTime = 1
 
-	deltaI := Time(1)
+	deltaI := Time(64)
 	times := []Time{}
-
+	fmt.Println("**************")
 	for i := Time(1); i < 10000; i += deltaI {
 		fmt.Println("i:", i)
 		//		fmt.Println(cblock.data[0:150])
 		times = append(times, i)
 		cblock.compressTime(i)
-
-		//		old_byte := cblock.byteNum
-		//		old_bit := cblock.bitNum
-		//		readed_time := Time(0)
-		//		for j, v := range times {
-		//			cblock.bitNum = 0
-		//			cblock.byteNum = 0
-		//			readed_time = cblock.readTime(readed_time)
-		//			if readed_time != v {
-		//				t.Error("readed_time!=v ", readed_time, v, " j=", j, times)
-		//				return
-		//			}
-
-		//		}
-		//		cblock.bitNum = old_bit
-		//		cblock.byteNum = old_byte
-		//deltaI += 25
+		if i == 385 {
+			break
+		}
 	}
 	fmt.Println("count: ", len(times), times)
 	cblock.bitNum = 0
 	cblock.byteNum = 0
 	readed_time := Time(0)
 	for i, v := range times {
-
+		prev_time := readed_time
 		readed_time = cblock.readTime(readed_time)
 		if readed_time != v {
-			t.Error("readed_time!=v ", readed_time, v, " i=", i)
+			t.Error("readed_time!=v ", readed_time, v, prev_time, "D=", v-prev_time, " i=", i)
+			return
 		}
+
 	}
 }
