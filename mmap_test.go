@@ -14,7 +14,7 @@ type tstHeader struct {
 	second int64
 }
 
-var testData = []byte("0000000000000000")
+var testData = []byte("0000000000000000000000000000000000000000000000000000000000000000")
 var testPath = filepath.Join(os.TempDir(), "testdata")
 
 func openFile(flags int) *os.File {
@@ -47,23 +47,31 @@ func openAndMap(t *testing.T) mmap.MMap {
 func TestMap(t *testing.T) {
 	const magicOne int = 1171
 	const magicTwo int64 = 1271
+	const szOfElement uint64 = uint64(unsafe.Sizeof(tstHeader{}))
 	{
 		mmaped := openAndMap(t)
-		hdr := (*tstHeader)(unsafe.Pointer(&mmaped[0]))
-		hdr.first = magicOne
-		hdr.second = magicTwo
+		for i := uint64(0); i < 2; i++ {
+			hdr := getPtr(mmaped, i, szOfElement)
+			hdr.first = magicOne
+			hdr.second = magicTwo
+		}
+
 		mmaped.Unmap()
 		f.Close()
 	}
 	{
 		mmaped := openAndMap(t)
-		hdr := (*tstHeader)(unsafe.Pointer(&mmaped[0]))
-		if hdr.first != magicOne {
-			t.Errorf("hdr.first != 1171")
-		}
+		for i := uint64(0); i < 2; i++ {
+			hdr := getPtr(mmaped, i, szOfElement)
 
-		if hdr.second != magicTwo {
-			t.Errorf("hdr.second = 1271")
+			if hdr.first != magicOne {
+				t.Errorf("hdr.first != 1171", hdr.first)
+			}
+
+			if hdr.second != magicTwo {
+				t.Errorf("hdr.second = 1271", hdr.second)
+			}
+
 		}
 		mmaped.Unmap()
 		f.Close()
