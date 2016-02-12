@@ -20,6 +20,28 @@ func TestCompressTimePanic(t *testing.T) {
 	cblock.compressTime(0)
 }
 
+func TestCompressIncBytePanic(t *testing.T) {
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("incBit not panic")
+		}
+	}()
+
+	cblock := NewCompressedBlock()
+	cblock.byteNum = MAX_BLOCK_SIZE
+	cblock.incByte()
+}
+
+func TestCompress2String(t *testing.T) {
+	cblock := NewCompressedBlock()
+	cblock.data[0] = 1
+	str := cblock.String()
+	if len(str) == 0 {
+		t.Error("empty ", str)
+	}
+}
+
 func TestCompressTime_Delta_64(t *testing.T) {
 	cblock := NewCompressedBlock()
 
