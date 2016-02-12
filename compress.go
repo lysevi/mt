@@ -78,6 +78,7 @@ func (c CompressedBlock) delta_64(t Time) uint16 {
 	binary.LittleEndian.PutUint16(bts, uint16(t))
 	bts[1] = 1
 	subres := binary.LittleEndian.Uint16(bts)
+	fmt.Println(">>> ", subres)
 	return subres
 }
 
@@ -115,7 +116,6 @@ func (c *CompressedBlock) write_64(D uint16) {
 	bts := []byte{0, 0}
 	binary.LittleEndian.PutUint16(bts, D)
 
-	fmt.Println(bts)
 	cur_byte := &c.data[c.byteNum]
 	bvalue := getBit(bts[1], 0)
 	*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
@@ -125,7 +125,6 @@ func (c *CompressedBlock) write_64(D uint16) {
 		bvalue = getBit(bts[0], uint8(i))
 		cur_byte := &c.data[c.byteNum]
 		*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
-		fmt.Println("i:", i, "bit:", bvalue, "{", c.byteNum, c.bitNum, "}", *cur_byte)
 		c.incBit()
 	}
 }
