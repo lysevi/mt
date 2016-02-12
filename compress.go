@@ -108,3 +108,19 @@ func (c CompressedBlock) delta_big(t Time) uint64 {
 	subres := binary.LittleEndian.Uint64(bts)
 	return subres
 }
+
+func (c *CompressedBlock) write_64(D uint16) {
+
+}
+
+func (c *CompressedBlock) write_256(D uint16) {
+
+}
+
+func (c *CompressedBlock) write_2048(D uint16) {
+
+}
+
+func (c *CompressedBlock) write_big(D uint64) {
+
+}

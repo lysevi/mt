@@ -100,3 +100,41 @@ func TestCompressTime_Delta_Big(t *testing.T) {
 		t.Error("res!= 68719476735", res)
 	}
 }
+
+func TestCompressTime_Write_Delta_64(t *testing.T) {
+	cblock := NewCompressedBlock()
+	cblock.write_64(257) //100000001
+	if cblock.bitNum != 1 || cblock.byteNum != 1 {
+		t.Error("cblock.bitNum != 1 || cblock.byteNum != 1", cblock.bitNum, cblock.byteNum)
+	}
+	if cblock.data[0] != 1 {
+		t.Error("cblock.data[0] != 1", cblock.data[0])
+	}
+	cblock.write_64(320)
+	cblock.write_64(319)
+}
+
+func TestCompressTime_Write_Delta_256(t *testing.T) {
+	cblock := NewCompressedBlock()
+	cblock.write_256(3328) //110100000000
+	if cblock.bitNum != 1 || cblock.byteNum != 1 {
+		t.Error("cblock.bitNum != 1 || cblock.byteNum != 1", cblock.bitNum, cblock.byteNum)
+	}
+	cblock.write_256(3327)
+	cblock.write_256(3137)
+}
+
+func TestCompressTime_Write_Delta_2048(t *testing.T) {
+	cblock := NewCompressedBlock()
+	cblock.write_2048(59392) //1110100000000000
+	cblock.write_2048(57601)
+	cblock.write_2048(61439)
+}
+
+func TestCompressTime_Write_Delta_big(t *testing.T) {
+	cblock := NewCompressedBlock()
+	cblock.write_big(64424511489) //111100000000000000000000100000000001
+	cblock.write_big(64424574975)
+	cblock.write_big(64424513535)
+	cblock.write_big(68719476735)
+}
