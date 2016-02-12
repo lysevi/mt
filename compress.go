@@ -326,3 +326,26 @@ func (c *CompressedBlock) incBit() {
 func (c *CompressedBlock) addMeas(m Meas) {
 	c.compressTime(m.Tstamp)
 }
+
+func (c CompressedBlock) String() string {
+	res := "["
+	for i := uint64(0); i < c.byteNum; i++ {
+		cur_byte := c.data[i]
+		for j := (MAX_BIT); j >= 0; j-- {
+			if j == 3 {
+				res += " "
+			}
+			if checkBit(cur_byte, uint8(j)) {
+				res += "1"
+			} else {
+				res += "0"
+			}
+		}
+		res += "\n "
+		if i == 7 {
+			res += "\n "
+		}
+	}
+	res += "]"
+	return res
+}
