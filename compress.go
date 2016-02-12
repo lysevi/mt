@@ -76,7 +76,7 @@ func (c CompressedBlock) delta_64(t Time) uint16 {
 	binary.LittleEndian.PutUint16(bts, uint16(t))
 	bts[1] = 1
 	subres := binary.LittleEndian.Uint16(bts)
-	return uint16(subres)
+	return subres
 }
 
 func (c CompressedBlock) delta_256(t Time) uint16 {
@@ -86,7 +86,7 @@ func (c CompressedBlock) delta_256(t Time) uint16 {
 	bts[1] = setBit(bts[1], 2, 1)
 	bts[1] = setBit(bts[1], 1, 0)
 	subres := binary.LittleEndian.Uint16(bts)
-	return uint16(subres)
+	return subres
 }
 
 func (c CompressedBlock) delta_2048(t Time) uint16 {
