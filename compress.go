@@ -4,7 +4,7 @@ package main
 
 import (
 	_ "bytes"
-	_ "encoding/binary"
+	"encoding/binary"
 	_ "fmt"
 	//	"unsafe"
 )
@@ -72,7 +72,11 @@ func (c CompressedBlock) compressTime(t Time) {
 }
 
 func (c CompressedBlock) delta_64(t Time) uint16 {
-	return 0
+	bts := []byte{0, 1, 0, 0}
+	binary.LittleEndian.PutUint16(bts, uint16(t))
+	bts[1] = 1
+	subres := binary.LittleEndian.Uint32(bts)
+	return uint16(subres)
 }
 
 func (c CompressedBlock) delta_256(t Time) uint16 {
