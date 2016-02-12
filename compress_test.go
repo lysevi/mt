@@ -55,7 +55,7 @@ func TestCompressTimeAddFirst(t *testing.T) {
 		t.Error("readed_t != t1", readed_t, t1)
 	}
 
-	if cblock.byteNum != 9 {
+	if cblock.byteNum != 8 {
 		t.Error("cblock.byteNum!=9")
 	}
 }
@@ -92,7 +92,7 @@ func TestCompressTimeAddSecond(t *testing.T) {
 			t.Error("2 cblock.bitNum!=MAX_BIT", cblock.bitNum)
 		}
 
-		if cblock.data[9] != 151 { // 1001 0111
+		if cblock.data[8] != 151 { // 1001 0111
 			t.Error("2  cblock.data[9] != 151", cblock.data[9])
 		}
 	}
@@ -106,29 +106,29 @@ func TestCompressTimeAddSecond(t *testing.T) {
 		cblock.compressTime(t1)
 		cblock.compressTime(t2)
 
-		if cblock.byteNum != 8+2 {
-			t.Error("2 cblock.byteNum!=8+2 ", cblock.byteNum, 8+2)
+		if cblock.byteNum != 8+1 {
+			t.Error("2 cblock.byteNum!=8+1 ", cblock.byteNum, 8+1)
 		}
 
-		if !checkBit(cblock.data[9], MAX_BIT) {
-			t.Error("2 checkBit(cblock.data[0],MAX_BIT)", cblock.data[9])
+		if !checkBit(cblock.data[8], MAX_BIT) {
+			t.Error("2 checkBit(cblock.data[0],MAX_BIT)", cblock.data[8])
 		}
 
-		if !checkBit(cblock.data[9], MAX_BIT-1) {
-			t.Error("2 checkBit(cblock.data[0],MAX_BIT-1)", cblock.data[9])
+		if !checkBit(cblock.data[8], MAX_BIT-1) {
+			t.Error("2 checkBit(cblock.data[0],MAX_BIT-1)", cblock.data[8])
 		}
 
-		if checkBit(cblock.data[9], MAX_BIT-2) {
-			t.Error("2 checkBit(cblock.data[0],MAX_BIT-2)", cblock.data[9])
+		if checkBit(cblock.data[8], MAX_BIT-2) {
+			t.Error("2 checkBit(cblock.data[0],MAX_BIT-2)", cblock.data[8])
 		}
 		//1100 0111  1110 0000
 		//|----199-|   224
-		if cblock.data[9] != 199 {
-			t.Error("cblock.data[9]!=199", cblock.data[9])
+		if cblock.data[8] != 199 {
+			t.Error("cblock.data[8]!=199", cblock.data[8])
 		}
 
-		if cblock.data[10] != 224 {
-			t.Error("cblock.data[9]!=224", cblock.data[10])
+		if cblock.data[9] != 224 {
+			t.Error("cblock.data[9]!=224", cblock.data[9])
 		}
 	}
 
@@ -141,33 +141,33 @@ func TestCompressTimeAddSecond(t *testing.T) {
 		cblock.compressTime(t1)
 		cblock.compressTime(t2)
 
-		if cblock.byteNum != 8+4 {
-			t.Error("2 cblock.byteNum!=8+4 ", cblock.byteNum, 8+4)
+		if cblock.byteNum != 8+3 {
+			t.Error("2 cblock.byteNum!=8+3", cblock.byteNum, 8+3)
 		}
 
-		if !checkBit(cblock.data[9], MAX_BIT) {
+		if !checkBit(cblock.data[8], MAX_BIT) {
 			t.Error("2 checkBit(cblock.data[0],MAX_BIT)", cblock.data[9])
 		}
 
-		if !checkBit(cblock.data[9], MAX_BIT-1) {
+		if !checkBit(cblock.data[8], MAX_BIT-1) {
 			t.Error("2 checkBit(cblock.data[0],MAX_BIT-1)", cblock.data[9])
 		}
 
-		if !checkBit(cblock.data[9], MAX_BIT-2) {
+		if !checkBit(cblock.data[8], MAX_BIT-2) {
 			t.Error("2 checkBit(cblock.data[0],MAX_BIT-2)", cblock.data[9])
 		}
 
-		if checkBit(cblock.data[9], MAX_BIT-3) {
+		if checkBit(cblock.data[8], MAX_BIT-3) {
 			t.Error("2 checkBit(cblock.data[0],MAX_BIT-3)", cblock.data[9])
 		}
 		//1110 0011  1111 1000
 		//|----231-|   252
-		if cblock.data[9] != 227 {
-			t.Error("cblock.data[9]!=239", cblock.data[9])
+		if cblock.data[8] != 227 {
+			t.Error("cblock.data[9]!=239", cblock.data[8])
 		}
 
-		if cblock.data[10] != 254 {
-			t.Error("cblock.data[9]!=248", cblock.data[10])
+		if cblock.data[9] != 254 {
+			t.Error("cblock.data[9]!=248", cblock.data[9])
 		}
 	}
 
@@ -180,37 +180,37 @@ func TestCompressTimeAddSecond(t *testing.T) {
 		cblock.compressTime(t1)
 		cblock.compressTime(t2)
 
-		if cblock.byteNum != 8+5 {
-			t.Error("2 cblock.byteNum!=8+4 ", cblock.byteNum, 8+5)
+		if cblock.byteNum != 8+4 {
+			t.Error("2 cblock.byteNum!=8+4 ", cblock.byteNum, 8+4)
 		}
 
-		if !checkBit(cblock.data[9], MAX_BIT) {
-			t.Error("2 checkBit(cblock.data[0],MAX_BIT)", cblock.data[9])
+		if !checkBit(cblock.data[8], MAX_BIT) {
+			t.Error("2 checkBit(cblock.data[0],MAX_BIT)", cblock.data[8])
 		}
 
-		if !checkBit(cblock.data[9], MAX_BIT-1) {
-			t.Error("2 checkBit(cblock.data[0],MAX_BIT-1)", cblock.data[9])
+		if !checkBit(cblock.data[8], MAX_BIT-1) {
+			t.Error("2 checkBit(cblock.data[0],MAX_BIT-1)", cblock.data[8])
 		}
 
-		if !checkBit(cblock.data[9], MAX_BIT-2) {
-			t.Error("2 checkBit(cblock.data[0],MAX_BIT-2)", cblock.data[9])
+		if !checkBit(cblock.data[8], MAX_BIT-2) {
+			t.Error("2 checkBit(cblock.data[0],MAX_BIT-2)", cblock.data[8])
 		}
 
-		if !checkBit(cblock.data[9], MAX_BIT-3) {
-			t.Error("2 checkBit(cblock.data[0],MAX_BIT-3)", cblock.data[9])
+		if !checkBit(cblock.data[8], MAX_BIT-3) {
+			t.Error("2 checkBit(cblock.data[0],MAX_BIT-3)", cblock.data[8])
 		}
 		//1111 0101  0101 1101 1011 1101 1011
 		//|----245-|   252
-		if cblock.data[9] != 245 {
-			t.Error("cblock.data[9]!=245", cblock.data[9])
+		if cblock.data[8] != 245 {
+			t.Error("cblock.data[9]!=245", cblock.data[8])
 		}
 
-		if cblock.data[10] != 93 {
-			t.Error("cblock.data[10]!=93", cblock.data[10])
+		if cblock.data[9] != 93 {
+			t.Error("cblock.data[9]!=93", cblock.data[9])
 		}
 
-		if cblock.data[11] != 219 {
-			t.Error("cblock.data[11]!=219", cblock.data[11])
+		if cblock.data[10] != 219 {
+			t.Error("cblock.data[10]!=219", cblock.data[10])
 		}
 	}
 }

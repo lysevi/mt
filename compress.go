@@ -47,7 +47,7 @@ func (c *CompressedBlock) compressFirstTime(t Time) {
 	}
 	c.prev_delta = 0
 	c.prev_time = t
-	c.byteNum += write_size + 1
+	c.byteNum = write_size
 }
 
 func (c *CompressedBlock) compressTime(t Time) {
@@ -217,7 +217,7 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 		buf := bytes.NewBuffer(b)
 		var readed_delta Time
 		binary.Read(buf, binary.LittleEndian, &readed_delta)
-		c.byteNum = 9
+		c.byteNum = 8
 		c.bitNum = MAX_BIT
 		return c.StartTime + readed_delta
 	}
