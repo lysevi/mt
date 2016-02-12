@@ -82,15 +82,16 @@ func TestBitOperations(t *testing.T) {
 		t.Error("value!=170", value)
 	}
 
-	value = 255
-	for i := 0; i < 8; i += 2 {
-		value = setBit(value, uint8(i), uint8(0))
-		if checkBit(value, uint8(i)) {
+	value = 0
+	for i := 0; i < 8; i++ {
+		value = setBit(value, uint8(i), uint8(1))
+		if !checkBit(value, uint8(i)) {
 			t.Errorf("!checkBit(value,i)")
 		}
 	}
-	if value != 170 {
-		t.Error("value!=170", value)
+
+	if value != 255 {
+		t.Error("value!=255", value)
 	}
 
 	value = setBit(255, 7, 0)

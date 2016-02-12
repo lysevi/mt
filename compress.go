@@ -39,6 +39,7 @@ func (c *CompressedBlock) compressFirstTime(t Time) {
 	binary.Write(buf, binary.LittleEndian, delta)
 
 	write_size := uint64(buf.Len())
+	fmt.Println("FIRST:::: ", delta, write_size, buf.Bytes())
 	byte_array := buf.Bytes()
 	j := 0
 	for i := c.byteNum; i < c.byteNum+write_size; i++ {
@@ -117,22 +118,24 @@ func (c *CompressedBlock) d_256(D int64) {
 	*cur_byte = setBit(*cur_byte, c.bitNum, 1)
 	c.incBit()
 
-	//fmt.Println("  >>> ", *cur_byte, c.bitNum, c.byteNum)
+	fmt.Println("  >>> ", *cur_byte, c.bitNum, c.byteNum)
 	cur_byte = &c.data[c.byteNum]
 	*cur_byte = setBit(*cur_byte, c.bitNum, 1)
 	c.incBit()
 
-	//	fmt.Println("  >>> ", *cur_byte, c.bitNum, c.byteNum)
+	fmt.Println("  >>> ", *cur_byte, c.bitNum, c.byteNum)
 	cur_byte = &c.data[c.byteNum]
 	*cur_byte = setBit(*cur_byte, c.bitNum, 0)
 	c.incBit()
 
-	//fmt.Println("  >>>! ", *cur_byte, c.bitNum, c.byteNum)
+	fmt.Println("  >>>! ", *cur_byte, c.bitNum, c.byteNum)
 	bite_value := byte(D)
-	for i := uint8(0); i <= 7; i++ {
+	for i := uint8(0); i < 8; i++ {
 		cur_byte = &c.data[c.byteNum]
 		time_bit := getBit(bite_value, i)
+		//time_bit = 1
 		*cur_byte = setBit(*cur_byte, c.bitNum, time_bit)
+		fmt.Println("[-255;256]  >  ", i, *cur_byte, c.bitNum, c.byteNum, time_bit)
 		c.incBit()
 	}
 }
@@ -214,9 +217,11 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 	if c.byteNum == 0 {
 		fmt.Println("R FIRST")
 		b := c.data[0:8]
+
 		buf := bytes.NewBuffer(b)
 		var readed_delta Time
 		binary.Read(buf, binary.LittleEndian, &readed_delta)
+		fmt.Print("readed b", b, " delta=", readed_delta)
 		c.byteNum = 8
 		c.bitNum = MAX_BIT
 		return c.StartTime + readed_delta
@@ -234,7 +239,7 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 
 	res2 := getBit(*cur_byte, c.bitNum)
 
-	fmt.Println("res2: ", res1, res2, c.data[c.byteNum])
+	//fmt.Println("res2: ", res1, res2, c.data[c.byteNum])
 	c.incBit()
 	if res1 == 1 && res2 == 0 {
 		fmt.Println("R -63 63")
@@ -251,22 +256,25 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 
 	res3 := getBit(*cur_byte, c.bitNum)
 	c.incBit()
-	fmt.Println("res3: ", res1, res2, res3)
+	//fmt.Println("res3: ", res1, res2, res3)
 	if res1 == 1 && res2 == 1 && res3 == 0 {
 		fmt.Println("R -255 255")
 		res := byte(0)
 		for i := uint8(0); i <= 7; i++ {
 			cur_byte = &c.data[c.byteNum]
 			time_bit := getBit(*cur_byte, c.bitNum)
+			fmt.Println("tb: ", i, time_bit)
 			c.incBit()
 			res = setBit(res, i, time_bit)
+
 		}
+		fmt.Println("result: ", prev_readed+Time(res))
 		return prev_readed + Time(res)
 	}
 
 	res4 := getBit(*cur_byte, c.bitNum)
 	c.incBit()
-	fmt.Println("res4: ", res1, res2, res3, res4)
+	//fmt.Println("res4: ", res1, res2, res3, res4)
 	if res1 == 1 && res2 == 1 && res3 == 1 && res4 == 0 {
 		fmt.Println("R [-2047, 2048]")
 		b := []byte{0, 0, 0, 0, 0, 0, 0, 0}
@@ -305,7 +313,7 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 		return prev_readed + Time(readed_delta)
 	}
 
-	fmt.Println("END ")
+	panic("END ")
 	return 0
 }
 func (c *CompressedBlock) incByte() {
@@ -329,7 +337,7 @@ func (c *CompressedBlock) addMeas(m Meas) {
 
 func (c CompressedBlock) String() string {
 	res := "["
-	for i := uint64(0); i < c.byteNum; i++ {
+	for i := uint64(0); i < 20; i++ {
 		cur_byte := c.data[i]
 		for j := (MAX_BIT); j >= 0; j-- {
 			if j == 3 {

@@ -337,8 +337,70 @@ func TestCompressTimeRead(t *testing.T) {
 		}
 	}
 
+	{ // !
+		fmt.Println("****************")
+		//		var t2 = Time(321)
+		cblock := NewCompressedBlock()
+		cblock.StartTime = 0
+
+		cblock.compressTime(1)
+		cblock.compressTime(65)
+		cblock.compressTime(129)
+		cblock.compressTime(193)
+		cblock.compressTime(257)
+		cblock.compressTime(321)
+		fmt.Println("+++++++++++++++++++++++")
+		cblock.compressTime(385)
+		fmt.Println("-----------------------")
+
+		fmt.Println("cblock: ", cblock.String())
+		fmt.Println("pos: ", cblock.bitNum, cblock.byteNum)
+
+		cblock.bitNum = 0
+		cblock.byteNum = 0
+
+		tm := cblock.readTime(0)
+		if tm != 1 {
+			t.Error("tm!=t1", tm, 1)
+		}
+
+		tm = cblock.readTime(tm)
+		if tm != 65 {
+			t.Error("tm!=t1", tm, 65)
+		}
+		tm = cblock.readTime(tm)
+		if tm != 129 {
+			t.Error("tm!=t1", tm, 129)
+		}
+
+		tm = cblock.readTime(tm)
+		if tm != 193 {
+			t.Error("tm!=t1", tm, 193)
+		}
+		tm = cblock.readTime(tm)
+		if tm != 257 {
+			t.Error("tm!=t1", tm, 257)
+		}
+
+		tm = cblock.readTime(tm)
+		if tm != 321 {
+			t.Error("tm!=t1", tm, 321)
+		}
+		fmt.Println("pos: ", cblock.bitNum, cblock.byteNum)
+
+		fmt.Println("+++++++++++++++++++++++")
+		tm = cblock.readTime(tm)
+		fmt.Println("-----------------------")
+		if tm != 385 {
+			t.Error("tm!=t2", tm, 385)
+		}
+
+		fmt.Println("cblock: ", cblock.String())
+	}
+
 }
 
+/*
 func TestCompressTimeManyAppends(t *testing.T) {
 	cblock := NewCompressedBlock()
 	cblock.StartTime = 1
@@ -346,26 +408,32 @@ func TestCompressTimeManyAppends(t *testing.T) {
 	deltaI := Time(64)
 	times := []Time{}
 	fmt.Println("**************")
-	for i := Time(1); i < 10000; i += deltaI {
+	for i := Time(1); i < 1000; i += deltaI {
 		fmt.Println("i:", i)
-		//		fmt.Println(cblock.data[0:150])
 		times = append(times, i)
 		cblock.compressTime(i)
 		if i == 385 {
 			break
 		}
 	}
+	fmt.Printf("cblock: %s\n", cblock.String())
 	fmt.Println("count: ", len(times), times)
 	cblock.bitNum = 0
 	cblock.byteNum = 0
 	readed_time := Time(0)
+	rt := []Time{}
 	for i, v := range times {
-		prev_time := readed_time
-		readed_time = cblock.readTime(readed_time)
-		if readed_time != v {
-			t.Error("readed_time!=v ", readed_time, v, prev_time, "D=", v-prev_time, " i=", i)
-			return
-		}
-
+		//prev_time := readed_time
+		readed_time = cblock.readTime(1)
+		rt = append(rt, readed_time)
+		fmt.Println("i:", i, readed_time, v)
+		//		if readed_time != v {
+		//			fmt.Printf("error : %s\n", cblock.String())
+		//			t.Error("readed_time!=v ", readed_time, v, prev_time, "D=", v-prev_time, " i=", i)
+		//			return
+		//		}
 	}
+
+	fmt.Println("rt: ", len(rt), rt)
 }
+*/
