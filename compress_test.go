@@ -145,13 +145,24 @@ func TestCompressTime_Write_Delta_256(t *testing.T) {
 func TestCompressTime_Write_Delta_2048(t *testing.T) {
 	cblock := NewCompressedBlock()
 	cblock.write_2048(59392) //1110100000000000
-	cblock.write_2048(57601)
-	cblock.write_2048(61439)
+	if cblock.data[0] != 232 || cblock.data[1] != 0 {
+		t.Error("first error: ", cblock.data[0], cblock.data[1])
+	}
+	cblock.write_2048(57601) //1110000100000001
+	if cblock.data[2] != 225 || cblock.data[3] != 1 {
+		t.Error("second error: ", cblock.data[2], cblock.data[3])
+	}
+
+	cblock.write_2048(61439) //1110111111111111
+	if cblock.data[4] != 239 || cblock.data[5] != 255 {
+		t.Error("second error: ", cblock.data[4], cblock.data[5])
+	}
 }
 
 func TestCompressTime_Write_Delta_big(t *testing.T) {
 	cblock := NewCompressedBlock()
 	cblock.write_big(64424511489) //111100000000000000000000100000000001
+
 	cblock.write_big(64424574975)
 	cblock.write_big(64424513535)
 	cblock.write_big(68719476735)

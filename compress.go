@@ -158,7 +158,18 @@ func (c *CompressedBlock) write_256(D uint16) {
 }
 
 func (c *CompressedBlock) write_2048(D uint16) {
-
+	bts := []byte{0, 0}
+	binary.LittleEndian.PutUint16(bts, D)
+	fmt.Println(bts)
+	for bn := range bts {
+		b := bts[1-bn] //reverse iterations
+		for i := int8(7); i >= 0; i-- {
+			bvalue := getBit(b, uint8(i))
+			cur_byte := &c.data[c.byteNum]
+			*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
+			c.incBit()
+		}
+	}
 }
 
 func (c *CompressedBlock) write_big(D uint64) {
