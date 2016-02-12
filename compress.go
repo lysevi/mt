@@ -192,3 +192,31 @@ func (c *CompressedBlock) write_big(D uint64) {
 		}
 	}
 }
+
+func (c *CompressedBlock) readTime(prev_readed Time) Time {
+	cur_byte := &c.data[c.byteNum]
+	res1 := getBit(*cur_byte, c.bitNum)
+	c.incBit()
+
+	if res1 == 0 {
+		fmt.Println("zero !>>>> ", res1)
+		return prev_readed
+
+	}
+
+	res2 := getBit(*cur_byte, c.bitNum)
+	c.incBit()
+	if res1 == 1 && res2 == 0 {
+		fmt.Println("R -63 63")
+		res := byte(0)
+
+		for i := int8(6); i >= 0; i-- {
+			cur_byte := &c.data[c.byteNum]
+			time_bit := getBit(*cur_byte, c.bitNum)
+			c.incBit()
+			res = setBit(res, uint8(i), time_bit)
+		}
+		return prev_readed + Time(res)
+	}
+	return 0
+}

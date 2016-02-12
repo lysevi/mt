@@ -200,3 +200,30 @@ func TestCompressTime_Write_Delta_big(t *testing.T) {
 		t.Error(cblock.String())
 	}
 }
+
+func TestCompressRead_64(t *testing.T) {
+	cblock := NewCompressedBlock()
+	res := cblock.delta_64(1)
+	cblock.write_64(res)
+
+	res = cblock.delta_64(64)
+	cblock.write_64(res)
+
+	res = cblock.delta_64(63)
+	cblock.write_64(res)
+
+	cblock.byteNum = 0
+	cblock.bitNum = MAX_BIT
+
+	if sr := cblock.readTime(0); sr != 1 {
+		t.Error("sr:", sr, cblock.String())
+	}
+
+	if sr := cblock.readTime(0); sr != 64 {
+		t.Error("sr:", sr)
+	}
+
+	if sr := cblock.readTime(0); sr != 63 {
+		t.Error("sr:", sr)
+	}
+}
