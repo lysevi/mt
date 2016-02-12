@@ -1,8 +1,6 @@
 package main
 
 import (
-	_ "bytes"
-	_ "encoding/binary"
 	"fmt"
 	"testing"
 )
