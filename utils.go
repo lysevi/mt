@@ -1,4 +1,4 @@
-package mt
+package main
 
 func idFltr(ids []Id, idV Id) bool {
 	if len(ids) == 0 {

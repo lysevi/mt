@@ -1,4 +1,4 @@
-package mt
+package main
 
 // paper http://www.vldb.org/pvldb/vol8/p1816-teller.pdf
 
@@ -44,10 +44,6 @@ func (c *CompressedBlock) incBit() {
 	}
 }
 
-func (c CompressedBlock) compressTime(t Time) {
-	panic("not implemented")
-}
-
 func (c CompressedBlock) String() string {
 	res := "["
 	for i := uint64(0); i < 20; i++ {
@@ -69,4 +65,24 @@ func (c CompressedBlock) String() string {
 	}
 	res += "]"
 	return res
+}
+
+func (c CompressedBlock) compressTime(t Time) {
+	panic("not implemented")
+}
+
+func (c CompressedBlock) delta_64(t Time) uint16 {
+	return 0
+}
+
+func (c CompressedBlock) delta_256(t Time) uint16 {
+	return 0
+}
+
+func (c CompressedBlock) delta_2048(t Time) uint16 {
+	return 0
+}
+
+func (c CompressedBlock) delta_big(t Time) uint64 {
+	return 0
 }
