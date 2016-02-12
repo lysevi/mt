@@ -5,9 +5,11 @@ package main
 import (
 	_ "bytes"
 	"encoding/binary"
-	_ "fmt"
+	"fmt"
 	//	"unsafe"
 )
+
+var _ = fmt.Sprintf("")
 
 const MAX_BLOCK_SIZE = 1024 * 1024
 const MAX_BIT = 7
@@ -18,7 +20,7 @@ type CompressedBlock struct {
 	prev_time  Time
 	byteNum    uint64 //cur byte pos
 	bitNum     uint8  //cur bit  pos
-	data       [MAX_BLOCK_SIZE]byte
+	data       [MAX_BLOCK_SIZE]uint8
 }
 
 func NewCompressedBlock() *CompressedBlock {
@@ -110,7 +112,22 @@ func (c CompressedBlock) delta_big(t Time) uint64 {
 }
 
 func (c *CompressedBlock) write_64(D uint16) {
+	bts := []byte{0, 0}
+	binary.LittleEndian.PutUint16(bts, D)
 
+	fmt.Println(bts)
+	cur_byte := &c.data[c.byteNum]
+	bvalue := getBit(bts[1], 0)
+	*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
+	c.incBit()
+
+	for i := int8(7); i >= 0; i-- {
+		bvalue = getBit(bts[0], uint8(i))
+		cur_byte := &c.data[c.byteNum]
+		*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
+		fmt.Println("i:", i, "bit:", bvalue, "{", c.byteNum, c.bitNum, "}", *cur_byte)
+		c.incBit()
+	}
 }
 
 func (c *CompressedBlock) write_256(D uint16) {

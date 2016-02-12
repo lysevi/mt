@@ -103,12 +103,14 @@ func TestCompressTime_Delta_Big(t *testing.T) {
 
 func TestCompressTime_Write_Delta_64(t *testing.T) {
 	cblock := NewCompressedBlock()
-	cblock.write_64(257) //100000001
-	if cblock.bitNum != 1 || cblock.byteNum != 1 {
+	cblock.write_64(257) //1 0000 0001
+	//	fmt.Println(cblock.String())
+	if cblock.bitNum != 6 || cblock.byteNum != 1 {
 		t.Error("cblock.bitNum != 1 || cblock.byteNum != 1", cblock.bitNum, cblock.byteNum)
 	}
-	if cblock.data[0] != 1 {
-		t.Error("cblock.data[0] != 1", cblock.data[0])
+	//1000 00001
+	if cblock.data[0] != 128 || cblock.data[1] != 128 {
+		t.Error("cblock.data[0] != 1 || cblock.data[2] != 1: ", cblock.data[0], cblock.data[1])
 	}
 	cblock.write_64(320)
 	cblock.write_64(319)
