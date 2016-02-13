@@ -101,3 +101,29 @@ func TestBitOperations(t *testing.T) {
 		t.Error("value!=126", value)
 	}
 }
+
+func TestBitOperations16(t *testing.T) {
+	value := uint16(0)
+	for i := 0; i < 16; i++ {
+		value = setBit16(value, uint8(i), uint8(1))
+		if !checkBit16(value, uint8(i)) {
+			t.Errorf("!checkBit(value,i)")
+		}
+	}
+	if value != 65535 {
+		t.Error("value!=65535", value)
+	}
+}
+
+func TestBitOperations32(t *testing.T) {
+	value := uint32(0)
+	for i := 0; i < 32; i++ {
+		value = setBit32(value, uint8(i), uint8(1))
+		if !checkBit32(value, uint8(i)) {
+			t.Errorf("!checkBit(value,i)")
+		}
+	}
+	if value != 4294967295 {
+		t.Error("value!=4294967295", value)
+	}
+}
