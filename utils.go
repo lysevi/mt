@@ -79,3 +79,20 @@ func getBit32(v uint32, bitNum uint8) uint32 {
 func checkBit32(v uint32, bitNum uint8) bool {
 	return (getBit32(v, bitNum)) == 1
 }
+
+func setBit64(v uint64, bitNum uint8, bitValue uint8) uint64 {
+	if bitValue == 1 {
+		return v | (1 << bitNum)
+	} else {
+		v &^= (1 << bitNum)
+		return v
+	}
+}
+
+func getBit64(v uint64, bitNum uint8) uint64 {
+	return ((v >> bitNum) & 1)
+}
+
+func checkBit64(v uint64, bitNum uint8) bool {
+	return (getBit64(v, bitNum)) == 1
+}

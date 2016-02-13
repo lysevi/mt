@@ -132,3 +132,13 @@ func TestBitOperations32(t *testing.T) {
 		t.Error("value!=4294967295", value)
 	}
 }
+
+func TestBitOperations64(t *testing.T) {
+	value := uint64(0)
+	for i := 0; i < 64; i++ {
+		value = setBit64(value, uint8(i), uint8(1))
+		if !checkBit64(value, uint8(i)) {
+			t.Errorf("!checkBit(value,i)")
+		}
+	}
+}
