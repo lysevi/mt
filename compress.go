@@ -218,5 +218,20 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 		}
 		return prev_readed + Time(res)
 	}
+	res3 := getBit(*cur_byte, c.bitNum)
+	c.incBit()
+
+	if res1 == 1 && res2 == 1 && res3 == 0 {
+		fmt.Println("R -255 256")
+		res := uint16(0)
+
+		for i := int8(8); i >= 0; i-- {
+			cur_byte := &c.data[c.byteNum]
+			time_bit := getBit(*cur_byte, c.bitNum)
+			c.incBit()
+			res = setBit16(res, uint8(i), time_bit)
+		}
+		return prev_readed + Time(res)
+	}
 	return 0
 }
