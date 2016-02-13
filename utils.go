@@ -55,8 +55,8 @@ func setBit16(v uint16, bitNum uint8, bitValue uint8) uint16 {
 	}
 }
 
-func getBit16(v uint16, bitNum uint8) uint16 {
-	return ((v >> bitNum) & 1)
+func getBit16(v uint16, bitNum uint8) uint8 {
+	return uint8((v >> bitNum) & 1)
 }
 
 func checkBit16(v uint16, bitNum uint8) bool {
@@ -72,8 +72,8 @@ func setBit32(v uint32, bitNum uint8, bitValue uint8) uint32 {
 	}
 }
 
-func getBit32(v uint32, bitNum uint8) uint32 {
-	return ((v >> bitNum) & 1)
+func getBit32(v uint32, bitNum uint8) uint8 {
+	return uint8((v >> bitNum) & 1)
 }
 
 func checkBit32(v uint32, bitNum uint8) bool {
@@ -89,8 +89,8 @@ func setBit64(v uint64, bitNum uint8, bitValue uint8) uint64 {
 	}
 }
 
-func getBit64(v uint64, bitNum uint8) uint64 {
-	return ((v >> bitNum) & 1)
+func getBit64(v uint64, bitNum uint8) uint8 {
+	return uint8((v >> bitNum) & 1)
 }
 
 func checkBit64(v uint64, bitNum uint8) bool {

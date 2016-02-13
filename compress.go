@@ -3,7 +3,6 @@ package main
 // paper http://www.vldb.org/pvldb/vol8/p1816-teller.pdf
 
 import (
-	"encoding/binary"
 	"fmt"
 )
 
@@ -103,16 +102,13 @@ func (c CompressedBlock) delta_big(t Time) uint64 {
 }
 
 func (c *CompressedBlock) write_64(D uint16) {
-	bts := []byte{0, 0}
-	binary.LittleEndian.PutUint16(bts, D)
-
 	cur_byte := &c.data[c.byteNum]
-	bvalue := getBit(bts[1], 0)
+	bvalue := getBit16(D, 8)
 	*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 	c.incBit()
 
 	for i := int8(7); i >= 0; i-- {
-		bvalue = getBit(bts[0], uint8(i))
+		bvalue = getBit16(D, uint8(i))
 		cur_byte := &c.data[c.byteNum]
 		*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 		c.incBit()
@@ -120,31 +116,28 @@ func (c *CompressedBlock) write_64(D uint16) {
 }
 
 func (c *CompressedBlock) write_256(D uint16) {
-	bts := []byte{0, 0}
-	binary.LittleEndian.PutUint16(bts, D)
-
 	cur_byte := &c.data[c.byteNum]
-	bvalue := getBit(bts[1], 3)
+	bvalue := getBit16(D, 11)
 	*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 	c.incBit()
 
-	bvalue = getBit(bts[1], 2)
+	bvalue = getBit16(D, 10)
 	cur_byte = &c.data[c.byteNum]
 	*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 	c.incBit()
 
-	bvalue = getBit(bts[1], 1)
+	bvalue = getBit16(D, 9)
 	cur_byte = &c.data[c.byteNum]
 	*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 	c.incBit()
 
-	bvalue = getBit(bts[1], 0)
+	bvalue = getBit16(D, 8)
 	cur_byte = &c.data[c.byteNum]
 	*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 	c.incBit()
 
 	for i := int8(7); i >= 0; i-- {
-		bvalue = getBit(bts[0], uint8(i))
+		bvalue = getBit16(D, uint8(i))
 		cur_byte = &c.data[c.byteNum]
 		*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 		c.incBit()
@@ -152,38 +145,26 @@ func (c *CompressedBlock) write_256(D uint16) {
 }
 
 func (c *CompressedBlock) write_2048(D uint16) {
-	bts := []byte{0, 0}
-	binary.LittleEndian.PutUint16(bts, D)
-
-	for bn := range bts {
-		b := bts[1-bn] //reverse iterations
-		for i := int8(7); i >= 0; i-- {
-			bvalue := getBit(b, uint8(i))
-			cur_byte := &c.data[c.byteNum]
-			*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
-			c.incBit()
-		}
+	for bn := 15; bn >= 0; bn-- {
+		bvalue := getBit16(D, uint8(bn))
+		cur_byte := &c.data[c.byteNum]
+		*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
+		c.incBit()
 	}
 }
 
 func (c *CompressedBlock) write_big(D uint64) {
-	bts := []byte{0, 0, 0, 0, 0, 0, 0, 0}
-	binary.LittleEndian.PutUint64(bts, D)
-
 	for i := 0; i < 4; i++ {
 		cur_byte := &c.data[c.byteNum]
 		*cur_byte = setBit(*cur_byte, c.bitNum, 1)
 		c.incBit()
 	}
 
-	for bn := 3; bn >= 0; bn-- {
-		b := bts[bn]
-		for i := int8(7); i >= 0; i-- {
-			bvalue := getBit(b, uint8(i))
-			cur_byte := &c.data[c.byteNum]
-			*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
-			c.incBit()
-		}
+	for bn := 31; bn >= 0; bn-- {
+		bvalue := getBit64(D, uint8(bn))
+		cur_byte := &c.data[c.byteNum]
+		*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
+		c.incBit()
 	}
 }
 
