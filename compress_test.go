@@ -281,3 +281,30 @@ func TestCompressRead_2048(t *testing.T) {
 		t.Error("sr:", sr)
 	}
 }
+
+func TestCompressRead_big(t *testing.T) {
+	cblock := NewCompressedBlock()
+	res := cblock.delta_big(2049)
+	cblock.write_big(res) //111100000000000000000000100000000001
+
+	res = cblock.delta_big(65535)
+	cblock.write_big(res)
+
+	res = cblock.delta_big(4095)
+	cblock.write_big(res)
+
+	cblock.byteNum = 0
+	cblock.bitNum = MAX_BIT
+
+	if sr := cblock.readTime(0); sr != 2049 {
+		t.Error("sr:", sr, cblock.String())
+	}
+
+	if sr := cblock.readTime(0); sr != 65535 {
+		t.Error("sr:", sr)
+	}
+
+	if sr := cblock.readTime(0); sr != 4095 {
+		t.Error("sr:", sr)
+	}
+}

@@ -249,5 +249,18 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 		}
 		return prev_readed + Time(res)
 	}
-	return 0
+
+	if res1 == 1 && res2 == 1 && res3 == 1 && res4 == 1 {
+		fmt.Println("R big")
+		res := uint32(0)
+
+		for i := int8(31); i >= 0; i-- {
+			cur_byte := &c.data[c.byteNum]
+			time_bit := getBit(*cur_byte, c.bitNum)
+			c.incBit()
+			res = setBit32(res, uint8(i), time_bit)
+		}
+		return prev_readed + Time(res)
+	}
+	panic("read error!!!")
 }
