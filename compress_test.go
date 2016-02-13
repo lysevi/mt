@@ -308,3 +308,28 @@ func TestCompressRead_big(t *testing.T) {
 		t.Error("sr:", sr)
 	}
 }
+
+func TestCompressReadAll(t *testing.T) {
+	cblock := NewCompressedBlock()
+	iterations := 4
+	for i := 0; i < iterations; i++ {
+		//cblock.write_64(cblock.delta_64(1))
+		cblock.write_64(cblock.delta_64(64))
+		cblock.write_64(cblock.delta_64(63))
+	}
+
+	cblock.byteNum = 0
+	cblock.bitNum = MAX_BIT
+
+	for i := 0; i < iterations; i++ {
+		t_1 := 1 //cblock.readTime(0)
+		t_64 := cblock.readTime(0)
+		t_63 := cblock.readTime(0)
+
+		if t_1 != 1 || t_64 != 64 || t_63 != 63 {
+			t.Error("d64 read error i:", i, t_1, t_64, t_63)
+			fmt.Print(cblock.String())
+			return
+		}
+	}
+}
