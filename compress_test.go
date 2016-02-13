@@ -387,7 +387,7 @@ func TestCompressTimeWrite(t *testing.T) {
 	for _, tm = range times {
 		readed_t = cblock.readTime(readed_t)
 		if readed_t != tm {
-			t.Errorf("read error:", readed_t, tm)
+			t.Error("read error:", readed_t, tm)
 		}
 	}
 }

@@ -3,7 +3,6 @@ package main
 // paper http://www.vldb.org/pvldb/vol8/p1816-teller.pdf
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 )
@@ -271,24 +270,6 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 	panic("read error!!!")
 }
 
-/// if first insertion
-func (c *CompressedBlock) compressFirstTime(t Time) {
-	buf := new(bytes.Buffer)
-	delta := t - c.StartTime
-	binary.Write(buf, binary.LittleEndian, delta)
-
-	write_size := uint64(buf.Len())
-	byte_array := buf.Bytes()
-	j := 0
-	for i := c.byteNum; i < c.byteNum+write_size; i++ {
-		c.data[i] = byte_array[j]
-		j++
-	}
-	c.prev_delta = 0
-	c.prev_time = t
-	c.byteNum = write_size
-}
-
 func (c *CompressedBlock) writeTime(t Time) {
 	if t < c.StartTime {
 		panic(fmt.Errorf("compressTime:"))
@@ -297,32 +278,29 @@ func (c *CompressedBlock) writeTime(t Time) {
 	if c.byteNum == 0 {
 		c.prev_time = c.StartTime
 	}
-	{
-		delta := int64(t) - int64(c.prev_time)
-		D := (int64)(delta)
 
-		//		fmt.Println("D=", D, "t=", t, c.prev_time, c.prev_delta)
+	delta := int64(t) - int64(c.prev_time)
+	D := (int64)(delta)
 
-		if D == 0 {
-			cur_byte := &c.data[c.byteNum]
-			*cur_byte = setBit(*cur_byte, c.bitNum, 0)
-			c.incBit()
+	if D == 0 {
+		cur_byte := &c.data[c.byteNum]
+		*cur_byte = setBit(*cur_byte, c.bitNum, 0)
+		c.incBit()
+	} else {
+		if D > (-63) && D < 64 {
+			c.write_64(c.delta_64(Time(D)))
 		} else {
-			if D > (-63) && D < 64 {
-				c.write_64(c.delta_64(Time(D)))
+			if D > (-255) && D < 256 {
+				c.write_256(c.delta_256(Time(D)))
 			} else {
-				if D > (-255) && D < 256 {
-					c.write_256(c.delta_256(Time(D)))
+				if D > (-2047) && D < 2048 {
+					c.write_2048(c.delta_2048(Time(D)))
 				} else {
-					if D > (-2047) && D < 2048 {
-						c.write_2048(c.delta_2048(Time(D)))
-					} else {
-						c.write_big(c.delta_big(Time(D)))
-					}
+					c.write_big(c.delta_big(Time(D)))
 				}
 			}
 		}
-		c.prev_time = t
-		c.prev_delta = delta
 	}
+	c.prev_time = t
+	c.prev_delta = delta
 }
