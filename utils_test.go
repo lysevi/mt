@@ -100,6 +100,11 @@ func TestBitOperations(t *testing.T) {
 	if value != 126 {
 		t.Error("value!=126", value)
 	}
+
+	value = 64
+	if checkBit(value, 7) || !checkBit(value, 6) {
+		t.Error("64 test error")
+	}
 }
 
 func TestBitOperations16(t *testing.T) {

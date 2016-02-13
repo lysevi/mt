@@ -313,21 +313,34 @@ func TestCompressReadAll(t *testing.T) {
 	cblock := NewCompressedBlock()
 	iterations := 4
 	for i := 0; i < iterations; i++ {
-		//cblock.write_64(cblock.delta_64(1))
+		cblock.write_64(cblock.delta_64(1))
 		cblock.write_64(cblock.delta_64(64))
-		cblock.write_64(cblock.delta_64(63))
+		cblock.write_64(cblock.delta_64(64))
+
+		cblock.write_256(cblock.delta_256(256))
+		cblock.write_256(cblock.delta_256(255))
+		cblock.write_256(cblock.delta_256(65))
 	}
 
 	cblock.byteNum = 0
 	cblock.bitNum = MAX_BIT
 
 	for i := 0; i < iterations; i++ {
-		t_1 := 1 //cblock.readTime(0)
+		t_1 := cblock.readTime(0)
 		t_64 := cblock.readTime(0)
 		t_63 := cblock.readTime(0)
-
-		if t_1 != 1 || t_64 != 64 || t_63 != 63 {
+		if t_1 != 1 || t_64 != 64 || t_63 != 64 {
 			t.Error("d64 read error i:", i, t_1, t_64, t_63)
+			fmt.Print(cblock.String())
+			return
+		}
+
+		t_256 := cblock.readTime(0)
+		t_255 := cblock.readTime(0)
+		t_65 := cblock.readTime(0)
+
+		if t_256 != 256 || t_255 != 255 || t_65 != 65 {
+			t.Error("d256 read error i:", i, t_256, t_255, t_65)
 			fmt.Print(cblock.String())
 			return
 		}

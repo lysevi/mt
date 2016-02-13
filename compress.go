@@ -50,6 +50,7 @@ func (c CompressedBlock) String() string {
 	res := "["
 	for i := uint64(0); i < 20; i++ {
 		cur_byte := c.data[i]
+		res += fmt.Sprintf("%v: ", i)
 		for j := (MAX_BIT); j >= 0; j-- {
 			if j == 3 {
 				res += " "
@@ -195,29 +196,38 @@ func (c *CompressedBlock) write_big(D uint64) {
 
 func (c *CompressedBlock) readTime(prev_readed Time) Time {
 	cur_byte := &c.data[c.byteNum]
+	fmt.Println("cur_byte: ", *cur_byte)
+
+	if *cur_byte == 5 {
+		fmt.Println("1")
+	}
+
 	res1 := getBit(*cur_byte, c.bitNum)
 	c.incBit()
-
+	fmt.Println("pos: ", c.byteNum, c.bitNum)
 	if res1 == 0 {
 		fmt.Println("zero !>>>> ", res1)
 		return prev_readed
 
 	}
-
+	cur_byte = &c.data[c.byteNum]
 	res2 := getBit(*cur_byte, c.bitNum)
+	fmt.Println("pos: ", c.byteNum, c.bitNum, "ress:", res1, res2)
 	c.incBit()
+
 	if res1 == 1 && res2 == 0 {
 		fmt.Println("R -63 63")
 		res := byte(0)
 
 		for i := int8(6); i >= 0; i-- {
-			cur_byte := &c.data[c.byteNum]
+			cur_byte = &c.data[c.byteNum]
 			time_bit := getBit(*cur_byte, c.bitNum)
 			c.incBit()
 			res = setBit(res, uint8(i), time_bit)
 		}
 		return prev_readed + Time(res)
 	}
+	cur_byte = &c.data[c.byteNum]
 	res3 := getBit(*cur_byte, c.bitNum)
 	c.incBit()
 
@@ -226,14 +236,14 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 		res := uint16(0)
 
 		for i := int8(8); i >= 0; i-- {
-			cur_byte := &c.data[c.byteNum]
+			cur_byte = &c.data[c.byteNum]
 			time_bit := getBit(*cur_byte, c.bitNum)
 			c.incBit()
 			res = setBit16(res, uint8(i), time_bit)
 		}
 		return prev_readed + Time(res)
 	}
-
+	cur_byte = &c.data[c.byteNum]
 	res4 := getBit(*cur_byte, c.bitNum)
 	c.incBit()
 
@@ -242,7 +252,7 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 		res := uint32(0)
 
 		for i := int8(11); i >= 0; i-- {
-			cur_byte := &c.data[c.byteNum]
+			cur_byte = &c.data[c.byteNum]
 			time_bit := getBit(*cur_byte, c.bitNum)
 			c.incBit()
 			res = setBit32(res, uint8(i), time_bit)
