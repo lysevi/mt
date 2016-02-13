@@ -368,3 +368,26 @@ func TestCompressReadAll(t *testing.T) {
 		}
 	}
 }
+
+func TestCompressTimeWrite(t *testing.T) {
+	cblock := NewCompressedBlock()
+	iterations := 20
+	tm := Time(1)
+	times := []Time{}
+	for i := 0; i < iterations; i++ {
+		cblock.writeTime(tm)
+		times = append(times, tm)
+		tm *= 2
+	}
+
+	cblock.bitNum = MAX_BIT
+	cblock.byteNum = 0
+
+	readed_t := Time(cblock.StartTime)
+	for _, tm = range times {
+		readed_t = cblock.readTime(readed_t)
+		if readed_t != tm {
+			t.Errorf("read error:", readed_t, tm)
+		}
+	}
+}
