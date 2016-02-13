@@ -68,10 +68,6 @@ func (c CompressedBlock) String() string {
 	return res
 }
 
-func (c CompressedBlock) compressTime(t Time) {
-	panic("not implemented")
-}
-
 func (c CompressedBlock) delta_64(t Time) uint16 {
 	bts := []byte{0, 1}
 	binary.LittleEndian.PutUint16(bts, uint16(t))

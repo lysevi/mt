@@ -17,7 +17,7 @@ func TestCompressTimePanic(t *testing.T) {
 
 	cblock := NewCompressedBlock()
 	cblock.StartTime = 1
-	cblock.compressTime(0)
+	cblock.writeTime(0)
 }
 
 func TestCompressIncBytePanic(t *testing.T) {
@@ -371,6 +371,7 @@ func TestCompressReadAll(t *testing.T) {
 
 func TestCompressTimeWrite(t *testing.T) {
 	cblock := NewCompressedBlock()
+	cblock.StartTime = 1
 	iterations := 20
 	tm := Time(1)
 	times := []Time{}
