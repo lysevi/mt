@@ -139,20 +139,23 @@ func (c *CompressedBlock) write_256(D uint16) {
 	c.incBit()
 
 	bvalue = getBit(bts[1], 2)
+	cur_byte = &c.data[c.byteNum]
 	*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 	c.incBit()
 
 	bvalue = getBit(bts[1], 1)
+	cur_byte = &c.data[c.byteNum]
 	*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 	c.incBit()
 
 	bvalue = getBit(bts[1], 0)
+	cur_byte = &c.data[c.byteNum]
 	*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 	c.incBit()
 
 	for i := int8(7); i >= 0; i-- {
 		bvalue = getBit(bts[0], uint8(i))
-		cur_byte := &c.data[c.byteNum]
+		cur_byte = &c.data[c.byteNum]
 		*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 		c.incBit()
 	}
@@ -196,27 +199,21 @@ func (c *CompressedBlock) write_big(D uint64) {
 
 func (c *CompressedBlock) readTime(prev_readed Time) Time {
 	cur_byte := &c.data[c.byteNum]
-	fmt.Println("cur_byte: ", *cur_byte)
-
-	if *cur_byte == 5 {
-		fmt.Println("1")
-	}
+	//	fmt.Println("cur_byte: ", *cur_byte)
 
 	res1 := getBit(*cur_byte, c.bitNum)
 	c.incBit()
-	fmt.Println("pos: ", c.byteNum, c.bitNum)
 	if res1 == 0 {
-		fmt.Println("zero !>>>> ", res1)
 		return prev_readed
 
 	}
 	cur_byte = &c.data[c.byteNum]
 	res2 := getBit(*cur_byte, c.bitNum)
-	fmt.Println("pos: ", c.byteNum, c.bitNum, "ress:", res1, res2)
+	//	fmt.Println("pos: ", c.byteNum, c.bitNum, "ress:", res1, res2)
 	c.incBit()
 
 	if res1 == 1 && res2 == 0 {
-		fmt.Println("R -63 63")
+		//		fmt.Println("R -63 63")
 		res := byte(0)
 
 		for i := int8(6); i >= 0; i-- {
@@ -232,7 +229,7 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 	c.incBit()
 
 	if res1 == 1 && res2 == 1 && res3 == 0 {
-		fmt.Println("R -255 256")
+		//		fmt.Println("R -255 256")
 		res := uint16(0)
 
 		for i := int8(8); i >= 0; i-- {
@@ -248,7 +245,7 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 	c.incBit()
 
 	if res1 == 1 && res2 == 1 && res3 == 1 && res4 == 0 {
-		fmt.Println("R -2047 2048")
+		//		fmt.Println("R -2047 2048")
 		res := uint32(0)
 
 		for i := int8(11); i >= 0; i-- {
@@ -261,7 +258,7 @@ func (c *CompressedBlock) readTime(prev_readed Time) Time {
 	}
 
 	if res1 == 1 && res2 == 1 && res3 == 1 && res4 == 1 {
-		fmt.Println("R big")
+		//		fmt.Println("R big")
 		res := uint32(0)
 
 		for i := int8(31); i >= 0; i-- {

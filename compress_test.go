@@ -311,7 +311,7 @@ func TestCompressRead_big(t *testing.T) {
 
 func TestCompressReadAll(t *testing.T) {
 	cblock := NewCompressedBlock()
-	iterations := 4
+	iterations := 100
 	for i := 0; i < iterations; i++ {
 		cblock.write_64(cblock.delta_64(1))
 		cblock.write_64(cblock.delta_64(64))
@@ -320,6 +320,14 @@ func TestCompressReadAll(t *testing.T) {
 		cblock.write_256(cblock.delta_256(256))
 		cblock.write_256(cblock.delta_256(255))
 		cblock.write_256(cblock.delta_256(65))
+
+		cblock.write_2048(cblock.delta_2048(2048))
+		cblock.write_2048(cblock.delta_2048(257))
+		cblock.write_2048(cblock.delta_2048(4095))
+
+		cblock.write_big(cblock.delta_big(2049))
+		cblock.write_big(cblock.delta_big(65535))
+		cblock.write_big(cblock.delta_big(4095))
 	}
 
 	cblock.byteNum = 0
@@ -343,6 +351,20 @@ func TestCompressReadAll(t *testing.T) {
 			t.Error("d256 read error i:", i, t_256, t_255, t_65)
 			fmt.Print(cblock.String())
 			return
+		}
+
+		t_2048 := cblock.readTime(0)
+		t_257 := cblock.readTime(0)
+		t_4095 := cblock.readTime(0)
+		if t_2048 != 2048 || t_257 != 257 || t_4095 != 4095 {
+			t.Error("2048 error:", t_2048, t_257, t_4095, cblock.String())
+		}
+
+		t_2049 := cblock.readTime(0)
+		t_65535 := cblock.readTime(0)
+		t_4095 = cblock.readTime(0)
+		if t_2049 != 2049 || t_65535 != 65535 || t_4095 != 4095 {
+			t.Error("2048 error:", t_2048, t_257, t_4095, cblock.String())
 		}
 	}
 }
