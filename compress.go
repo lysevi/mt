@@ -44,8 +44,8 @@ func (c *CompressedBlock) incBit() {
 }
 
 func (c CompressedBlock) String() string {
-	res := "["
-	for i := uint64(0); i < 20; i++ {
+	res := "cblock: ["
+	for i := uint64(0); i < c.byteNum; i++ {
 		cur_byte := c.data[i]
 		res += fmt.Sprintf("%v: ", i)
 		for j := (MAX_BIT); j >= 0; j-- {
