@@ -628,3 +628,44 @@ func TestCompressFlag(t *testing.T) {
 		}
 	}
 }
+
+func TestCompressMeas(t *testing.T) {
+	{
+		cblock := NewCompressedBlock()
+
+		m1 := NewMeas(1, Time(1), int64(2), Flag(3))
+		cblock.Add(m1)
+
+		m2 := NewMeas(1, Time(2), int64(5), Flag(4))
+		cblock.Add(m2)
+
+		readed := cblock.ReadAll()
+		if len(readed) != 2 {
+			t.Error("len(readed)!=2", len(readed), readed)
+		} else {
+			if !measEqual(readed[0], m1) {
+				t.Error("measEqual(readed[0], m1)", readed[0].String(), m1.String())
+			}
+			if !measEqual(readed[1], m2) {
+				t.Error("measEqual(readed[1], m2)", readed[1].String(), m2.String())
+			}
+		}
+	}
+	cblock := NewCompressedBlock()
+	iterations := 100
+	for i := 0; i < iterations; i++ {
+		m := NewMeas(1, Time(i), int64(i), Flag(i))
+		cblock.Add(m)
+	}
+
+	meases := cblock.ReadAll()
+
+	if len(meases) != iterations {
+		t.Error("len(meases)!=iterations", len(meases), iterations)
+	}
+	for i, v := range meases {
+		if v.Id != 1 || v.Flg != Flag(i) || v.Tstamp != Time(i) || v.Value != int64(i) {
+			t.Errorf("meas read error: ", v.String())
+		}
+	}
+}

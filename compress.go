@@ -23,10 +23,11 @@ type CompressedBlock struct {
 	prevTail   uint8
 	prevValue  uint64
 
-	prevFlag Flag
-	byteNum  uint64 //cur byte pos
-	bitNum   uint8  //cur bit  pos
-	data     [MAX_BLOCK_SIZE]uint8
+	startFlag uint64
+	prevFlag  Flag
+	byteNum   uint64 //cur byte pos
+	bitNum    uint8  //cur bit  pos
+	data      [MAX_BLOCK_SIZE]uint8
 }
 
 func NewCompressedBlock() *CompressedBlock {
@@ -379,6 +380,7 @@ func (c *CompressedBlock) readValue(prev uint64) uint64 {
 	c.incBit()
 
 	if res0 == 0 {
+		//		fmt.Println("res0 == 0")
 		return c.prevValue
 	}
 
@@ -387,6 +389,7 @@ func (c *CompressedBlock) readValue(prev uint64) uint64 {
 	c.incBit()
 
 	if res1 == 1 {
+		//		fmt.Println("res0 ==1")
 		leading := uint8(0)
 		for i := 5; i >= 0; i-- {
 			cur_byte = &c.data[c.byteNum]
@@ -411,7 +414,7 @@ func (c *CompressedBlock) readValue(prev uint64) uint64 {
 			c.incBit()
 			result = setBit64(result, uint8(i), b)
 		}
-		//		fmt.Println("xor: ", result)
+		//		fmt.Println("xor: ", result, "prev:", prev)
 		c.prevLead = leading
 		c.prevTail = tail
 		return result ^ prev
@@ -475,17 +478,72 @@ func (c *CompressedBlock) readFlag(prev Flag) Flag {
 	}
 }
 
-//func (c *CompressedBlock) Add(m Meas) bool {
-//	if m.Id != c.id {
-//		panic("m.Id!=c.id")
-//	}
+func (c *CompressedBlock) Add(m Meas) bool {
 
-//	c.writeTime(m.Tstamp)
-//	c.writeValue(uint64(m.Value))
-//	return true
-//}
+	if !c.firstValue && m.Id != c.id {
+		panic("m.Id!=c.id")
+	}
 
-//func (c *CompressedBlock) Add_range(m []Meas) int64 {}
+	if c.firstValue {
+		c.id = m.Id
+		c.StartTime = m.Tstamp
+		c.writeFlag(Flag(m.Flg))
+		c.writeValue(uint64(m.Value))
+	} else {
+		c.writeTime(m.Tstamp)
+		c.writeFlag(m.Flg)
+		c.writeValue(uint64(m.Value))
+		c.firstValue = false
+	}
+	return true
+}
+
+func (c *CompressedBlock) Add_range(m []Meas) int64 {
+	var res int64 = 0
+	for _, v := range m {
+		add_res := c.Add(v)
+		if !add_res {
+			break
+		}
+		res++
+	}
+	return res
+}
+
 //func (c *CompressedBlock) Cap() int64               {}
 //func (c *CompressedBlock) IsFull() bool             {}
 //func (c *CompressedBlock) Close()                   {}
+func (c *CompressedBlock) ReadAll() []Meas {
+	bytenum := c.byteNum
+	bitnum := c.bitNum
+	c.byteNum = 0
+	c.bitNum = MAX_BIT
+	defer func() {
+		c.byteNum = bytenum
+		c.bitNum = bitnum
+	}()
+
+	prev_time := c.StartTime
+	prev_value := c.startValue
+	prev_flag := c.prevFlag
+	m := NewMeas(c.id, prev_time, int64(prev_value), prev_flag)
+	result := []Meas{m}
+	for {
+		prev_time = c.readTime(prev_time)
+		prev_flag = c.readFlag(prev_flag)
+		prev_value = c.readValue(prev_value)
+		m = NewMeas(c.id, prev_time, int64(prev_value), prev_flag)
+
+		result = append(result, m)
+
+		if c.byteNum == bytenum && c.bitNum >= bitnum {
+			break
+		}
+	}
+	return result
+}
+
+//func (c *CompressedBlock) 	Read(ids []Id, from, to Time) []Meas {}
+//func (c *CompressedBlock) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas{}
+//func (c *CompressedBlock) 	TimePoint(ids []Id, time Time) []Meas{}
+//func (c *CompressedBlock) 	TimePointFltr(ids []Id, flg Flag, time Time) []Meas{}
