@@ -516,7 +516,7 @@ func (c *CompressedBlock) Add_range(m []Meas) int64 {
 
 func (c *CompressedBlock) Cap() int64 {
 	in_bytes := int64((MAX_BLOCK_SIZE - c.byteNum) / MEAS_MAX_SIZE)
-	if c.firstValue {
+	if !c.firstValue {
 		in_bytes--
 	}
 	return in_bytes
