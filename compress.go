@@ -428,5 +428,4 @@ func (c *CompressedBlock) readValue(prev uint64) uint64 {
 		//		fmt.Println("xor: ", result)
 		return result ^ prev
 	}
-	panic("read error")
 }

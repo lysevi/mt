@@ -474,15 +474,28 @@ func TestCompressValue(t *testing.T) {
 	{ // cur!=prev
 		cblock := NewCompressedBlock()
 		v1 := uint64(240)
-		v2 := uint64(224)
+		v2 := uint64(96)
+		v3 := uint64(176)
+		cblock.writeValue(32)
 		cblock.writeValue(v1)
 		cblock.writeValue(v2)
+		cblock.writeValue(v3)
 		cblock.bitNum = MAX_BIT
 		cblock.byteNum = 0
 
 		res := cblock.readValue(cblock.startValue)
+		if res != v1 {
+			t.Error("res!=v2", res, v1)
+		}
+
+		res = cblock.readValue(res)
 		if res != v2 {
 			t.Error("res!=v2", res, v2)
+		}
+
+		res = cblock.readValue(res)
+		if res != v3 {
+			t.Error("res!=v3", res, v3)
 		}
 	}
 
