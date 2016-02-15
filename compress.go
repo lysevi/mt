@@ -559,8 +559,7 @@ func (c *CompressedBlock) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
 		prev_time = c.readTime(prev_time)
 		prev_flag = c.readFlag(prev_flag)
 		prev_value = c.readValue(prev_value)
-		//if inTimeInterval(from, to, prev_time) && flagFltr(flg, prev_flag)
-		{
+		if inTimeInterval(from, to, prev_time) && flagFltr(flg, prev_flag) {
 			m = NewMeas(c.id, prev_time, int64(prev_value), prev_flag)
 
 			result = append(result, m)
