@@ -277,3 +277,38 @@ func (c *CompressedBlock) writeTime(t Time) {
 	c.prev_time = t
 	c.prev_delta = delta
 }
+
+func (c *CompressedBlock) leadingZeros(xor uint64) uint8 {
+	leading_zeros := uint8(0)
+	for i := uint8(63); i >= 0; i-- {
+		if checkBit64(xor, i) {
+			break
+		}
+		leading_zeros++
+	}
+	return leading_zeros
+}
+
+func (c *CompressedBlock) tailngZeros(xor uint64) uint8 {
+	tailng_zeros := uint8(0)
+	for i := uint8(0); i <= 63; i++ {
+		if checkBit64(xor, i) {
+			break
+		}
+		tailng_zeros++
+	}
+	return tailng_zeros
+}
+
+func (c *CompressedBlock) compressValue(prev, cur int64) int64 {
+	xor := prev ^ cur
+	if xor == 0 {
+		return 0
+	}
+
+	res := int64(-9223372036854775808) //1000....000
+	//	tailZeros := c.tailngZeros(xor)
+	//	leadingZeros := c.leadingZeros(xor)
+
+	return res
+}

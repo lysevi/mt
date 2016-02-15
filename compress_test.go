@@ -392,3 +392,20 @@ func TestCompressTimeWrite(t *testing.T) {
 		}
 	}
 }
+
+func TestCompressValue(t *testing.T) {
+	cblock := NewCompressedBlock()
+	if res := cblock.compressValue(10, 10); res != 0 {
+		t.Error("value compress on equals: ", res)
+	}
+
+	zeros := cblock.leadingZeros(1080863910568919040) // 111100000000000000000000000000000000000000000000000000000000
+	if zeros != 4 {
+		t.Error("cblock.leadingZeros:", zeros)
+	}
+
+	zeros = cblock.tailngZeros(240) // 11110000
+	if zeros != 4 {
+		t.Error("cblock.tailngZeros:", zeros)
+	}
+}
