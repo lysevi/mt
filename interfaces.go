@@ -1,7 +1,6 @@
 package main
 
 type MeasWriter interface {
-	New(size int64)
 	Add(m Meas) bool
 	Add_range(m []Meas) int64
 	Cap() int64
