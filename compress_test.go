@@ -394,18 +394,166 @@ func TestCompressTimeWrite(t *testing.T) {
 }
 
 func TestCompressValue(t *testing.T) {
-	cblock := NewCompressedBlock()
-	if res := cblock.compressValue(10, 10); res != 0 {
-		t.Error("value compress on equals: ", res)
+	{
+		cblock := NewCompressedBlock()
+		cblock.compressValue(10, 10, 0, 0)
+		if cblock.data[0] != 0 || cblock.bitNum != MAX_BIT-1 {
+			t.Error("value compress on equals: ", cblock.data[0], cblock.String())
+		}
+	}
+	{
+		cblock := NewCompressedBlock()
+		zeros := cblock.leadingZeros(1080863910568919040) //0001....
+		if zeros != 4 {
+			t.Error("cblock.leadingZeros:", zeros)
+		}
+
+		zeros = cblock.tailngZeros(240) // 11110000
+		if zeros != 4 {
+			t.Error("cblock.tailngZeros:", zeros)
+		}
+	}
+	{
+		cblock := NewCompressedBlock()
+		v1 := uint64(240) //1111 0000
+		v2 := uint64(224) //1110 0000
+
+		cblock.compressValue(v1, v2, 0, 0)
+		if cblock.data[0] != 251 {
+			t.Error("copmress error", cblock.data[0], cblock.String())
+		}
+
+		if cblock.data[1] != 18 {
+			t.Error("copmress error", cblock.data[1], cblock.String())
+		}
+
+		if cblock.prevValue != v2 {
+			t.Error("cblock.prevValue!=v2", cblock.prevValue)
+		}
+	}
+	{
+		cblock := NewCompressedBlock()
+		v1 := uint64(240) //1111 0000
+		v2 := uint64(224) //1110 0000
+
+		cblock.compressValue(v1, v2, 59, 4)
+		if cblock.data[0] != 160 {
+			t.Error("copmress error", cblock.data[0], cblock.String())
+		}
+	}
+	{
+		cblock := NewCompressedBlock()
+		v1 := uint64(240) //1111 0000
+		v2 := uint64(224) //1110 0000
+		cblock.writeValue(v1)
+		if cblock.prevValue != v1 || cblock.data[0] != 0 {
+			t.Error(cblock.prevValue, cblock.data[0])
+		}
+		cblock.writeValue(v2)
+
+		if cblock.data[0] != 251 || cblock.data[1] != 18 {
+			t.Error(cblock.data[0], cblock.data[1], cblock.String())
+		}
 	}
 
-	zeros := cblock.leadingZeros(1080863910568919040) // 111100000000000000000000000000000000000000000000000000000000
-	if zeros != 4 {
-		t.Error("cblock.leadingZeros:", zeros)
+	{ // cur==prev
+		cblock := NewCompressedBlock()
+		v1 := uint64(240)
+		v2 := uint64(240)
+		cblock.writeValue(v1)
+		cblock.writeValue(v2)
+		cblock.bitNum = MAX_BIT
+		cblock.byteNum = 0
+
+		res := cblock.readValue(cblock.prevValue)
+		if res != v2 {
+			t.Error("res!=v2", res, v2)
+		}
 	}
 
-	zeros = cblock.tailngZeros(240) // 11110000
-	if zeros != 4 {
-		t.Error("cblock.tailngZeros:", zeros)
+	{ // cur!=prev
+		cblock := NewCompressedBlock()
+		v1 := uint64(240)
+		v2 := uint64(224)
+		cblock.writeValue(v1)
+		cblock.writeValue(v2)
+		cblock.bitNum = MAX_BIT
+		cblock.byteNum = 0
+
+		res := cblock.readValue(cblock.startValue)
+		if res != v2 {
+			t.Error("res!=v2", res, v2)
+		}
+	}
+
+	{ // tail/lead is equals
+		cblock := NewCompressedBlock()
+		v1 := uint64(3840) //111100000000
+		v2 := uint64(3356) //111100010000
+
+		cblock.writeValue(1)
+		cblock.writeValue(v1)
+		cblock.writeValue(v2)
+		cblock.bitNum = MAX_BIT
+		cblock.byteNum = 0
+
+		res := cblock.readValue(cblock.startValue)
+		if res != v1 {
+			t.Error("res!=cblock.startValue", res, cblock.startValue)
+		}
+
+		res = cblock.readValue(res)
+		if res != v2 {
+			t.Error("res!=v2", res, v2)
+		}
+	}
+
+	{ // tail/lead not equals
+		cblock := NewCompressedBlock()
+		v1 := uint64(3840) //111100000000
+		v2 := uint64(3328) //110100000000
+
+		cblock.writeValue(0)
+		cblock.writeValue(v1)
+		cblock.writeValue(v2)
+		cblock.bitNum = MAX_BIT
+		cblock.byteNum = 0
+
+		res := cblock.readValue(cblock.startValue)
+		if res != v1 {
+			t.Error("res!=cblock.startValue", res, cblock.startValue)
+		}
+
+		res = cblock.readValue(res)
+		if res != v2 {
+			t.Error("res!=v2", res, v2)
+		}
+	}
+
+	{
+		cblock := NewCompressedBlock()
+		values := []uint64{}
+		delta := uint64(1)
+		for i := uint64(0); i < 50; i++ {
+			v := i * delta
+			cblock.writeValue(v)
+			values = append(values, v)
+			delta *= 2
+		}
+
+		if cblock.startValue != 0 {
+			t.Error("cblock.startValue != 0", cblock.startValue)
+		}
+
+		cblock.bitNum = MAX_BIT
+		cblock.byteNum = 0
+
+		readed_v := cblock.startValue
+		for i, v := range values[1:] {
+			readed_v = cblock.readValue(readed_v)
+			if readed_v != v {
+				t.Error("readed_v!=v", i, readed_v, v)
+			}
+		}
 	}
 }

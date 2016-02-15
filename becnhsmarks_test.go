@@ -99,3 +99,26 @@ func BenchmarkTimeRW(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkValuesRW(b *testing.B) {
+	for tnum := 0; tnum < b.N; tnum++ {
+		cblock := NewCompressedBlock()
+		values := []uint64{}
+		delta := uint64(1)
+		for i := uint64(0); i < 50; i++ {
+			v := i * delta
+			cblock.writeValue(v)
+			values = append(values, v)
+			delta *= 2
+		}
+
+		cblock.bitNum = MAX_BIT
+		cblock.byteNum = 0
+
+		readed_v := cblock.startValue
+
+		for _, _ = range values[1:] {
+			readed_v = cblock.readValue(readed_v)
+		}
+	}
+}
