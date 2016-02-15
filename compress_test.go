@@ -613,7 +613,7 @@ func TestCompressFlag(t *testing.T) {
 		cblock.bitNum = MAX_BIT
 		cblock.byteNum = 0
 		readed_flag := cblock.prevFlag
-		fmt.Println(flags)
+
 		for i, v := range flags {
 			readed_flag = cblock.readFlag(readed_flag)
 			if readed_flag != v {

@@ -122,3 +122,26 @@ func BenchmarkValuesRW(b *testing.B) {
 		}
 	}
 }
+func BenchmarkValuesFlags(b *testing.B) {
+	for tnum := 0; tnum < b.N; tnum++ {
+		cblock := NewCompressedBlock()
+
+		flags := []Flag{}
+		cblock.writeFlag(0)
+		cblock.firstValue = false
+		for i := Flag(1); i < 10; i++ {
+			cblock.writeFlag(i)
+			cblock.writeFlag(i)
+			flags = append(flags, i)
+		}
+
+		cblock.bitNum = MAX_BIT
+		cblock.byteNum = 0
+		readed_flag := cblock.prevFlag
+
+		for _, _ = range flags {
+			readed_flag = cblock.readFlag(readed_flag)
+			readed_flag = cblock.readFlag(readed_flag)
+		}
+	}
+}

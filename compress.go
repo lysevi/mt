@@ -434,19 +434,16 @@ func (c *CompressedBlock) readValue(prev uint64) uint64 {
 
 func (c *CompressedBlock) writeFlag(f Flag) {
 	if c.firstValue {
-		fmt.Println("first flag")
 		c.prevFlag = f
 		return
 	}
 
 	if c.prevFlag == f {
-		fmt.Println("duble flag")
 		cur_byte := &c.data[c.byteNum]
 		*cur_byte = setBit(*cur_byte, c.bitNum, 0)
 		c.incBit()
 		return
 	} else {
-		fmt.Println("new flag")
 		cur_byte := &c.data[c.byteNum]
 		*cur_byte = setBit(*cur_byte, c.bitNum, 1)
 		c.incBit()
@@ -465,10 +462,8 @@ func (c *CompressedBlock) readFlag(prev Flag) Flag {
 	b := getBit(*cur_byte, c.bitNum)
 	c.incBit()
 	if b == 0 {
-		fmt.Println("prev")
 		return prev
 	} else {
-		fmt.Println("new")
 		result := uint64(0)
 		for i := int8(63); i >= int8(0); i-- {
 			cur_byte = &c.data[c.byteNum]
