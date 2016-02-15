@@ -39,7 +39,7 @@ func checkWriterAddRange(t *testing.T, writer MeasWriter) {
 	m := make([]Meas, twice, twice)
 
 	writed := writer.Add_range(m)
-	if writed != size {
+	if writed < size {
 		t.Errorf("writed!=size, %d %d", writed, size)
 	}
 }

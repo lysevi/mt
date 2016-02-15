@@ -676,7 +676,7 @@ func TestCompresseBlockMeasAdd(t *testing.T) {
 	lc := NewCompressedBlock()
 	checkWriterAdd(t, lc)
 }
-
+*/
 func TestCompresseBlockMeasAddRange(t *testing.T) {
 	lc := NewCompressedBlock()
 	checkWriterAddRange(t, lc)
@@ -687,6 +687,7 @@ func TestCompresseBlockMeasAddRange_s(t *testing.T) {
 	checkStorageAddRange(t, lc)
 }
 
+/*
 func TestCompresseBlockMeasCheck(t *testing.T) {
 	lc := NewCompressedBlock()
 	checkStorage(t, lc, 0, 100, 5)
