@@ -4,35 +4,35 @@ import (
 	"testing"
 )
 
-func BenchmarkTimeDeltas64(b *testing.B) {
+func BenchmarkCompressedBlockTimeDeltas64(b *testing.B) {
 	cblock := NewCompressedBlock()
 	for i := 0; i < b.N; i++ {
 		cblock.delta_64(63)
 	}
 }
 
-func BenchmarkTimeDeltas256(b *testing.B) {
+func BenchmarkCompressedBlockTimeDeltas256(b *testing.B) {
 	cblock := NewCompressedBlock()
 	for i := 0; i < b.N; i++ {
 		cblock.delta_256(255)
 	}
 }
 
-func BenchmarkTimeDeltas2048(b *testing.B) {
+func BenchmarkCompressedBlockTimeDeltas2048(b *testing.B) {
 	cblock := NewCompressedBlock()
 	for i := 0; i < b.N; i++ {
 		cblock.delta_2048(2048)
 	}
 }
 
-func BenchmarkTimeDeltas_big(b *testing.B) {
+func BenchmarkCompressedBlockTimeDeltas_big(b *testing.B) {
 	cblock := NewCompressedBlock()
 	for i := 0; i < b.N; i++ {
 		cblock.delta_big(4294967295)
 	}
 }
 
-func BenchmarkDeltaTimeWrite(b *testing.B) {
+func BenchmarkCompressedBlockDeltaTimeWrite(b *testing.B) {
 	cblock := NewCompressedBlock()
 	for i := 0; i < b.N; i++ {
 		cblock.write_64(cblock.delta_64(1))
@@ -53,7 +53,7 @@ func BenchmarkDeltaTimeWrite(b *testing.B) {
 	}
 }
 
-func BenchmarkDeltaTimeRW(b *testing.B) {
+func BenchmarkCompressedBlockDeltaTimeRW(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		cblock := NewCompressedBlock()
 		iterations := 1
@@ -78,7 +78,7 @@ func BenchmarkDeltaTimeRW(b *testing.B) {
 	}
 }
 
-func BenchmarkTimeRW(b *testing.B) {
+func BenchmarkCompressedBlockTimeRW(b *testing.B) {
 	for tnum := 0; tnum < b.N; tnum++ {
 		cblock := NewCompressedBlock()
 		iterations := 1000
@@ -100,7 +100,7 @@ func BenchmarkTimeRW(b *testing.B) {
 	}
 }
 
-func BenchmarkValuesRW(b *testing.B) {
+func BenchmarkCompressedBlockValuesRW(b *testing.B) {
 	for tnum := 0; tnum < b.N; tnum++ {
 		cblock := NewCompressedBlock()
 		values := []uint64{}
@@ -122,7 +122,7 @@ func BenchmarkValuesRW(b *testing.B) {
 		}
 	}
 }
-func BenchmarkValuesFlags(b *testing.B) {
+func BenchmarkCompressedBlockValuesFlags(b *testing.B) {
 	for tnum := 0; tnum < b.N; tnum++ {
 		cblock := NewCompressedBlock()
 
