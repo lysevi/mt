@@ -640,6 +640,7 @@ func TestCompressMeas(t *testing.T) {
 		cblock.Add(m2)
 
 		readed := cblock.ReadAll()
+
 		if len(readed) != 2 {
 			t.Error("len(readed)!=2", len(readed), readed)
 		} else {

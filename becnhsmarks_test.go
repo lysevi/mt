@@ -145,3 +145,16 @@ func BenchmarkCompressedBlockValuesFlags(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkCompressedBlockMeasWrite(b *testing.B) {
+	for tnum := 0; tnum < b.N; tnum++ {
+		cblock := NewCompressedBlock()
+		iterations := 100
+		for i := 0; i < iterations; i++ {
+			m := NewMeas(1, Time(i), int64(i), Flag(i))
+			cblock.Add(m)
+		}
+		_ = cblock.ReadAll()
+
+	}
+}

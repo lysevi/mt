@@ -10,13 +10,14 @@ var _ = fmt.Sprintf("")
 
 const MAX_BLOCK_SIZE = 1024 * 1024
 const MAX_BIT = 7
+const MEAS_MAX_SIZE = 33 + 65 + 64 // time max size + flag + value
 
 type CompressedBlock struct {
 	id         Id
 	StartTime  Time
 	prev_delta int64
 	prev_time  Time
-
+	max_time   Time
 	firstValue bool
 	startValue uint64
 	prevLead   uint8
@@ -259,6 +260,9 @@ func (c *CompressedBlock) writeTime(t Time) {
 		panic(fmt.Errorf("compressTime:"))
 	}
 
+	if t > c.max_time {
+		c.max_time = t
+	}
 	if c.byteNum == 0 {
 		c.prev_time = c.StartTime
 	}
@@ -510,10 +514,29 @@ func (c *CompressedBlock) Add_range(m []Meas) int64 {
 	return res
 }
 
-//func (c *CompressedBlock) Cap() int64               {}
-//func (c *CompressedBlock) IsFull() bool             {}
-//func (c *CompressedBlock) Close()                   {}
+func (c *CompressedBlock) Cap() int64 {
+	return int64((MAX_BLOCK_SIZE - c.byteNum) / MEAS_MAX_SIZE)
+}
+
+func (c *CompressedBlock) IsFull() bool {
+	return (MAX_BLOCK_SIZE - c.byteNum) < MEAS_MAX_SIZE
+}
+
+func (c *CompressedBlock) Close() {}
+
 func (c *CompressedBlock) ReadAll() []Meas {
+	return c.Read([]Id{}, 0, c.max_time)
+}
+
+func (c *CompressedBlock) Read(ids []Id, from, to Time) []Meas {
+	return c.ReadFltr(ids, 0, from, to)
+}
+
+func (c *CompressedBlock) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
+	if len(ids) != 0 && idFltr(ids, c.id) {
+		return []Meas{}
+	}
+
 	bytenum := c.byteNum
 	bitnum := c.bitNum
 	c.byteNum = 0
@@ -532,10 +555,12 @@ func (c *CompressedBlock) ReadAll() []Meas {
 		prev_time = c.readTime(prev_time)
 		prev_flag = c.readFlag(prev_flag)
 		prev_value = c.readValue(prev_value)
-		m = NewMeas(c.id, prev_time, int64(prev_value), prev_flag)
+		//if inTimeInterval(from, to, prev_time) && flagFltr(flg, prev_flag)
+		{
+			m = NewMeas(c.id, prev_time, int64(prev_value), prev_flag)
 
-		result = append(result, m)
-
+			result = append(result, m)
+		}
 		if c.byteNum == bytenum && c.bitNum >= bitnum {
 			break
 		}
@@ -543,7 +568,9 @@ func (c *CompressedBlock) ReadAll() []Meas {
 	return result
 }
 
-//func (c *CompressedBlock) 	Read(ids []Id, from, to Time) []Meas {}
-//func (c *CompressedBlock) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas{}
-//func (c *CompressedBlock) 	TimePoint(ids []Id, time Time) []Meas{}
-//func (c *CompressedBlock) 	TimePointFltr(ids []Id, flg Flag, time Time) []Meas{}
+func (c *CompressedBlock) TimePoint(ids []Id, time Time) []Meas {
+	return c.Read(ids, 0, time)
+}
+func (c *CompressedBlock) TimePointFltr(ids []Id, flg Flag, time Time) []Meas {
+	return c.ReadFltr(ids, flg, 0, time)
+}
