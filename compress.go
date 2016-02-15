@@ -12,6 +12,7 @@ const MAX_BLOCK_SIZE = 1024 * 1024
 const MAX_BIT = 7
 
 type CompressedBlock struct {
+	id         Id
 	StartTime  Time
 	prev_delta int64
 	prev_time  Time
@@ -22,9 +23,10 @@ type CompressedBlock struct {
 	prevTail   uint8
 	prevValue  uint64
 
-	byteNum uint64 //cur byte pos
-	bitNum  uint8  //cur bit  pos
-	data    [MAX_BLOCK_SIZE]uint8
+	prevFlag Flag
+	byteNum  uint64 //cur byte pos
+	bitNum   uint8  //cur bit  pos
+	data     [MAX_BLOCK_SIZE]uint8
 }
 
 func NewCompressedBlock() *CompressedBlock {
@@ -429,3 +431,66 @@ func (c *CompressedBlock) readValue(prev uint64) uint64 {
 		return result ^ prev
 	}
 }
+
+func (c *CompressedBlock) writeFlag(f Flag) {
+	if c.firstValue {
+		fmt.Println("first flag")
+		c.prevFlag = f
+		return
+	}
+
+	if c.prevFlag == f {
+		fmt.Println("duble flag")
+		cur_byte := &c.data[c.byteNum]
+		*cur_byte = setBit(*cur_byte, c.bitNum, 0)
+		c.incBit()
+		return
+	} else {
+		fmt.Println("new flag")
+		cur_byte := &c.data[c.byteNum]
+		*cur_byte = setBit(*cur_byte, c.bitNum, 1)
+		c.incBit()
+
+		for i := int8(63); i >= int8(0); i-- {
+			b := getBit64(uint64(f), uint8(i))
+			cur_byte = &c.data[c.byteNum]
+			*cur_byte = setBit(*cur_byte, c.bitNum, b)
+			c.incBit()
+		}
+	}
+}
+
+func (c *CompressedBlock) readFlag(prev Flag) Flag {
+	cur_byte := &c.data[c.byteNum]
+	b := getBit(*cur_byte, c.bitNum)
+	c.incBit()
+	if b == 0 {
+		fmt.Println("prev")
+		return prev
+	} else {
+		fmt.Println("new")
+		result := uint64(0)
+		for i := int8(63); i >= int8(0); i-- {
+			cur_byte = &c.data[c.byteNum]
+			b := getBit(*cur_byte, c.bitNum)
+			c.incBit()
+			result = setBit64(uint64(result), uint8(i), b)
+		}
+		return Flag(result)
+	}
+}
+
+//func (c *CompressedBlock) Add(m Meas) bool {
+//	if m.Id != c.id {
+//		panic("m.Id!=c.id")
+//	}
+
+//	c.writeTime(m.Tstamp)
+//	c.writeValue(uint64(m.Value))
+//	return true
+//}
+
+//func (c *CompressedBlock) Add_range(m []Meas) int64 {}
+//func (c *CompressedBlock) Cap() int64               {}
+//func (c *CompressedBlock) IsFull() bool             {}
+//func (c *CompressedBlock) Close()                   {}

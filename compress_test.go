@@ -570,3 +570,61 @@ func TestCompressValue(t *testing.T) {
 		}
 	}
 }
+
+func TestCompressFlag(t *testing.T) {
+	{
+		cblock := NewCompressedBlock()
+
+		cblock.writeFlag(10)
+		cblock.firstValue = false
+		cblock.writeFlag(10)
+
+		if cblock.data[0] != 0 || cblock.byteNum != 0 || cblock.bitNum != MAX_BIT-1 {
+			t.Error(cblock.data[0], cblock.byteNum, cblock.bitNum)
+		}
+
+	}
+
+	{
+		cblock := NewCompressedBlock()
+
+		cblock.writeFlag(10)
+		cblock.firstValue = false
+		cblock.writeFlag(11)
+
+		if cblock.data[0] != 128 || cblock.byteNum != 8 {
+			t.Error(cblock.data[0], cblock.byteNum)
+		}
+
+	}
+	{
+		cblock := NewCompressedBlock()
+
+		flags := []Flag{}
+		cblock.writeFlag(0)
+		cblock.firstValue = false
+		for i := Flag(1); i < 10; i++ {
+			cblock.writeFlag(i)
+
+			cblock.writeFlag(i)
+			flags = append(flags, i)
+		}
+
+		cblock.bitNum = MAX_BIT
+		cblock.byteNum = 0
+		readed_flag := cblock.prevFlag
+		fmt.Println(flags)
+		for i, v := range flags {
+			readed_flag = cblock.readFlag(readed_flag)
+			if readed_flag != v {
+				t.Error("readed_flag!=v", i, readed_flag, v, cblock.String())
+			}
+
+			readed_flag = cblock.readFlag(readed_flag)
+			if readed_flag != v {
+				t.Error("readed_flag!=v", i, readed_flag, v, cblock.String())
+			}
+
+		}
+	}
+}
