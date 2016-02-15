@@ -19,7 +19,7 @@ func TestIntegrationCompressedBlock(t *testing.T) {
 	cblock.Add_range(meases)
 
 	uncompressedSize := uint64(28 * iterations)
-	if cblock.byteNum >= uncompressedSize {
+	if cblock.byteNum >= uncompressedSize/5 {
 		t.Error("compression not work: ", cblock.byteNum, uncompressedSize)
 	}
 	//	fmt.Println("used bytes: ", cblock.byteNum)
