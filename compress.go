@@ -275,13 +275,13 @@ func (c *CompressedBlock) writeTime(t Time) {
 		*cur_byte = setBit(*cur_byte, c.bitNum, 0)
 		c.incBit()
 	} else {
-		if D > (-63) && D < 64 {
+		if D < 127 {
 			c.write_64(c.delta_64(Time(D)))
 		} else {
-			if D > (-255) && D < 256 {
+			if D < 511 {
 				c.write_256(c.delta_256(Time(D)))
 			} else {
-				if D > (-2047) && D < 2048 {
+				if D < 4095 {
 					c.write_2048(c.delta_2048(Time(D)))
 				} else {
 					c.write_big(c.delta_big(Time(D)))

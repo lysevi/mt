@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"testing"
 )
+
+var _ = fmt.Sprintf("")
 
 func TestIntegrationCompressedBlock(t *testing.T) {
 	cblock := NewCompressedBlock()
@@ -22,8 +25,11 @@ func TestIntegrationCompressedBlock(t *testing.T) {
 	if cblock.byteNum >= uncompressedSize/5 {
 		t.Error("compression not work: ", cblock.byteNum, uncompressedSize)
 	}
-	//	fmt.Println("used bytes: ", cblock.byteNum)
-	//	fmt.Println("full size: ", 28*iterations)
+	//	used := cblock.byteNum
+	//	unpacked := 28 * iterations
+	//	fmt.Println("used bytes: ", used)
+	//	fmt.Println("full size: ", unpacked)
+	//	fmt.Printf("compression: %v \n", float32(unpacked)/float32(used))
 	//	fmt.Println("count: ", len(meases))
 
 	readed := cblock.ReadAll()
