@@ -4,6 +4,14 @@ import (
 	"testing"
 )
 
+func TestMemoryStorageAddSingle(t *testing.T) {
+	lc := NewMemoryStorage(200)
+	lc.Add(NewMeas(11, 3, 3, 2))
+	if len(lc.cblocks) != 1 {
+		t.Error("cblock len error: ", len(lc.cblocks))
+	}
+}
+
 func TestMemoryStorageAddRange(t *testing.T) {
 	lc := NewMemoryStorage(200)
 	checkWriterAddRange(t, lc)

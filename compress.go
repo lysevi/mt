@@ -8,7 +8,7 @@ import (
 
 var _ = fmt.Sprintf("")
 
-const MAX_BLOCK_SIZE = 1024 * 1024
+const MAX_BLOCK_SIZE = (1024 * 1024)
 const MAX_BIT = 7
 const MEAS_MAX_SIZE = 33 + 65 + 64 // time max size + flag + value
 

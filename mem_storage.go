@@ -14,6 +14,7 @@ type MemoryStorage struct {
 func NewMemoryStorage(sz int64) *MemoryStorage {
 	res := &MemoryStorage{}
 	res.max_time = 0
+	res.cblocks = append(res.cblocks, NewCompressedBlock())
 	return res
 }
 
@@ -23,15 +24,18 @@ func (c *MemoryStorage) Add(m Meas) bool {
 	}
 	var freeBlock *CompressedBlock = nil
 	for _, v := range c.cblocks {
-		if v.id == m.Id && !v.IsFull() {
+
+		if (v.id == m.Id || v.id == -1) && !v.IsFull() {
 			freeBlock = v
 			break
 		}
 	}
+
 	success := false
 	if freeBlock != nil {
 		success = freeBlock.Add(m)
 	} else {
+		fmt.Println("+1")
 		freeBlock = NewCompressedBlock()
 		success = freeBlock.Add(m)
 		c.cblocks = append(c.cblocks, freeBlock)
