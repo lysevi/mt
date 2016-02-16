@@ -37,6 +37,7 @@ func NewCompressedBlock() *CompressedBlock {
 	res.byteNum = 0
 	res.bitNum = MAX_BIT
 	res.firstValue = true
+	res.id = -1
 	return &res
 }
 
@@ -260,9 +261,6 @@ func (c *CompressedBlock) writeTime(t Time) {
 		panic(fmt.Errorf("compressTime:"))
 	}
 
-	if t > c.max_time {
-		c.max_time = t
-	}
 	if c.byteNum == 0 {
 		c.prev_time = c.StartTime
 	}
@@ -488,6 +486,10 @@ func (c *CompressedBlock) Add(m Meas) bool {
 		panic("m.Id!=c.id")
 	}
 
+	if m.Tstamp > c.max_time {
+		c.max_time = m.Tstamp
+	}
+
 	if c.firstValue {
 		c.id = m.Id
 		c.StartTime = m.Tstamp
@@ -541,6 +543,19 @@ func (c *CompressedBlock) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
 		return []Meas{}
 	}
 
+	prev_time := c.StartTime
+	prev_value := c.startValue
+	prev_flag := c.prevFlag
+	m := NewMeas(c.id, prev_time, int64(prev_value), prev_flag)
+	result := []Meas{}
+	if inTimeInterval(from, to, m.Tstamp) && flagFltr(flg, m.Flg) {
+		result = append(result, m)
+	}
+
+	if c.byteNum == 0 && c.bitNum == MAX_BIT {
+		return result
+	}
+
 	bytenum := c.byteNum
 	bitnum := c.bitNum
 	c.byteNum = 0
@@ -550,14 +565,6 @@ func (c *CompressedBlock) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
 		c.bitNum = bitnum
 	}()
 
-	prev_time := c.StartTime
-	prev_value := c.startValue
-	prev_flag := c.prevFlag
-	m := NewMeas(c.id, prev_time, int64(prev_value), prev_flag)
-	result := []Meas{}
-	if inTimeInterval(from, to, m.Tstamp) && flagFltr(flg, m.Flg) {
-		result = append(result, m)
-	}
 	for {
 		prev_time = c.readTime(prev_time)
 		prev_flag = c.readFlag(prev_flag)

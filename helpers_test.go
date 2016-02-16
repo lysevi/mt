@@ -84,7 +84,9 @@ func checkStorage(t *testing.T, storage MeasStorage, from, to, step Time) {
 		m.Id = Id(i)
 		m.Flg = Flag(i)
 		m.Tstamp = Time(i)
-		storage.Add(m)
+		if !storage.Add(m) {
+			t.Error("add error")
+		}
 		total_count++
 	}
 

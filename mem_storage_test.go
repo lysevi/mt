@@ -4,11 +4,6 @@ import (
 	"testing"
 )
 
-func TestMemoryStorageAdd(t *testing.T) {
-	lc := NewMemoryStorage(100)
-	checkWriterAdd(t, lc)
-}
-
 func TestMemoryStorageAddRange(t *testing.T) {
 	lc := NewMemoryStorage(200)
 	checkWriterAddRange(t, lc)

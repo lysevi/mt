@@ -671,6 +671,17 @@ func TestCompressMeas(t *testing.T) {
 	}
 }
 
+func TestCompresseBlockAddOne(t *testing.T) {
+	lc := NewCompressedBlock()
+
+	m := NewMeas(1, 10, 10, 0)
+	lc.Add(m)
+	res := lc.ReadAll()
+	if len(res) != 1 || !measEqual(res[0], m) {
+		t.Error("add error: ", res)
+	}
+}
+
 func TestCompresseBlockMeasAdd(t *testing.T) {
 	lc := NewCompressedBlock()
 	checkCompressWriterAdd(t, lc)
