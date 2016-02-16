@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/pkg/profile"
@@ -18,7 +17,7 @@ func main() {
 	fmt.Println("add:")
 	startTime := time.Now()
 	for i := 0; i < iterations; i++ {
-		m = NewMeas(1, tm, int64(math.Sin(float64(i))), Flag(0x002202))
+		m = NewMeas(1, tm, int64(i), Flag(0x002202))
 		tm += Time(10)
 		storage.Add(m)
 	}

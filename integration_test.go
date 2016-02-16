@@ -47,7 +47,7 @@ func TestIntegrationCompressedBlock(t *testing.T) {
 //	tm := Time(1)
 //	meases := []Meas{}
 //	for i := 0; i < iterations; i++ {
-//		m := NewMeas(1, tm, int64(math.Sin(float64(i))), Flag(0x002202))
+//		m := NewMeas(1, tm, int64(i), Flag(0x002202))
 //		tm += Time(1000)
 //		meases = append(meases, m)
 //	}
