@@ -35,7 +35,6 @@ func (c *MemoryStorage) Add(m Meas) bool {
 	if freeBlock != nil {
 		success = freeBlock.Add(m)
 	} else {
-		fmt.Println("+1")
 		freeBlock = NewCompressedBlock()
 		success = freeBlock.Add(m)
 		c.cblocks = append(c.cblocks, freeBlock)

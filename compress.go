@@ -120,6 +120,24 @@ func (c *CompressedBlock) write_64(D uint16) {
 	*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 	c.incBit()
 
+	//	if c.byteNum == MAX_BIT {
+	//		cur_byte := &c.data[c.byteNum]
+	//		*cur_byte = (*cur_byte) | byte(D)
+	//		c.byteNum++
+	//	} else {
+	//		step_h := MAX_BIT - c.bitNum
+	//		step_l := c.bitNum + 1
+	//		high := byte(D) >> step_h
+	//		low := byte(D) << (step_l)
+
+	//		cur_byte := &c.data[c.byteNum]
+	//		*cur_byte = (*cur_byte) | high
+	//		c.byteNum++
+
+	//		cur_byte = &c.data[c.byteNum]
+	//		*cur_byte = (*cur_byte) | low
+	//		c.bitNum = MAX_BIT - step_h
+	//	}
 	for i := int8(7); i >= 0; i-- {
 		bvalue = getBit16(D, uint8(i))
 		cur_byte := &c.data[c.byteNum]
@@ -267,7 +285,7 @@ func (c *CompressedBlock) writeTime(t Time) {
 
 	delta := int64(t) - int64(c.prev_time)
 	D := (int64)(delta)
-
+	//fmt.Println(D)
 	if D == 0 {
 		cur_byte := &c.data[c.byteNum]
 		*cur_byte = setBit(*cur_byte, c.bitNum, 0)

@@ -128,11 +128,11 @@ func TestCompressTime_Write_Delta_64(t *testing.T) {
 	cblock.write_64(257)
 	//	fmt.Println(cblock.String())
 	if cblock.bitNum != 6 || cblock.byteNum != 1 {
-		t.Error("cblock.bitNum != 1 || cblock.byteNum != 1", cblock.bitNum, cblock.byteNum)
+		t.Error("cblock.bitNum != 6 || cblock.byteNum != 1", cblock.bitNum, cblock.byteNum)
 	}
 	//1 0000 0001
 	if cblock.data[0] != 128 || cblock.data[1] != 128 {
-		t.Error("cblock.data[0] != 1 || cblock.data[2] != 1: ", cblock.data[0], cblock.data[1])
+		t.Error("cblock.data[0] != 128 || cblock.data[2] != 128: ", cblock.data[0], cblock.data[1])
 	}
 	//1 0100 0000
 	cblock.write_64(320)
