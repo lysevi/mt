@@ -13,6 +13,10 @@ func TestMeasInTimeInterval(t *testing.T) {
 	if inTimeInterval(0, 10, 11) {
 		t.Error("inTimeInterval(0,10,11)")
 	}
+
+	if !inTimeInterval(10, 0, 1) {
+		t.Error("inTimeInterval(10,0,1)")
+	}
 }
 
 func TestMeasIdFltr(t *testing.T) {

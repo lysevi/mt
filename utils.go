@@ -22,6 +22,11 @@ func flagFltr(fltrFlag, measFlag Flag) bool {
 
 func inTimeInterval(from, to, tstamp Time) bool {
 	// [from tstamp to]
+	if from > to {
+		t := from
+		from = to
+		to = t
+	}
 	if from <= tstamp && to >= tstamp {
 		return true
 	} else {
