@@ -72,7 +72,7 @@ func checkStorage(t *testing.T, storage MeasStorage, from, to, step Time) {
 		i := from
 		for _, m := range res {
 			if m.Id != Id(i) || m.Flg != Flag(i) || m.Tstamp != Time(i) {
-				t.Errorf("msg: ", m)
+				t.Error("msg: ", m)
 			}
 			i += step
 		}
@@ -153,7 +153,7 @@ func checkStorage_singleId(t *testing.T, storage MeasStorage, from, to, step Tim
 		i := from
 		for _, m := range res {
 			if m.Id != ID || m.Flg != Flag(i) || m.Tstamp != Time(i) {
-				t.Errorf("msg: ", m)
+				t.Error("msg: ", m)
 			}
 			i += step
 		}

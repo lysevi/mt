@@ -70,11 +70,11 @@ func TestMap(t *testing.T) {
 			hdr := getPtr(mmaped, i, szOfElement)
 
 			if hdr.first != magicOne {
-				t.Errorf("hdr.first != 1171", hdr.first)
+				t.Error("hdr.first != 1171", hdr.first)
 			}
 
 			if hdr.second != magicTwo {
-				t.Errorf("hdr.second = 1271", hdr.second)
+				t.Error("hdr.second = 1271", hdr.second)
 			}
 
 		}

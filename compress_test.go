@@ -196,7 +196,7 @@ func TestCompressTime_Write_Delta_big(t *testing.T) {
 		t.Error(cblock.String())
 	}
 	cblock.write_big(68719476735) //111111111111111111111111111111111111
-	if cblock.data[14] != 255 || cblock.data[15] != 255 || cblock.data[16] != 255 || cblock.data[16] != 255 || cblock.data[17] != 255 {
+	if cblock.data[14] != 255 || cblock.data[15] != 255 || cblock.data[16] != 255 || cblock.data[17] != 255 {
 		t.Error(cblock.String())
 	}
 }
@@ -666,7 +666,7 @@ func TestCompressMeas(t *testing.T) {
 	}
 	for i, v := range meases {
 		if v.Id != 1 || v.Flg != Flag(i) || v.Tstamp != Time(i) || v.Value != int64(i) {
-			t.Errorf("meas read error: ", v.String())
+			t.Error("meas read error: ", v.String())
 		}
 	}
 }
