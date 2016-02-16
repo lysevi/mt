@@ -19,7 +19,7 @@ func main() {
 	startTime := time.Now()
 	for i := 0; i < iterations; i++ {
 		m = NewMeas(1, tm, int64(math.Sin(float64(i))), Flag(0x002202))
-		tm += Time(1000)
+		tm += Time(10)
 		storage.Add(m)
 	}
 	endTime := time.Now()
