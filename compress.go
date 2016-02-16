@@ -537,7 +537,7 @@ func (c *CompressedBlock) Read(ids []Id, from, to Time) []Meas {
 }
 
 func (c *CompressedBlock) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
-	if len(ids) != 0 && idFltr(ids, c.id) {
+	if len(ids) != 0 && !idFltr(ids, c.id) {
 		return []Meas{}
 	}
 
@@ -554,7 +554,10 @@ func (c *CompressedBlock) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
 	prev_value := c.startValue
 	prev_flag := c.prevFlag
 	m := NewMeas(c.id, prev_time, int64(prev_value), prev_flag)
-	result := []Meas{m}
+	result := []Meas{}
+	if inTimeInterval(from, to, m.Tstamp) && flagFltr(flg, m.Flg) {
+		result = append(result, m)
+	}
 	for {
 		prev_time = c.readTime(prev_time)
 		prev_flag = c.readFlag(prev_flag)

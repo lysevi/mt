@@ -671,12 +671,11 @@ func TestCompressMeas(t *testing.T) {
 	}
 }
 
-/*
 func TestCompresseBlockMeasAdd(t *testing.T) {
 	lc := NewCompressedBlock()
-	checkWriterAdd(t, lc)
+	checkCompressWriterAdd(t, lc)
 }
-*/
+
 func TestCompresseBlockMeasAddRange(t *testing.T) {
 	lc := NewCompressedBlock()
 	checkWriterAddRange(t, lc)
@@ -687,9 +686,20 @@ func TestCompresseBlockMeasAddRange_s(t *testing.T) {
 	checkStorageAddRange(t, lc)
 }
 
-/*
 func TestCompresseBlockMeasCheck(t *testing.T) {
 	lc := NewCompressedBlock()
-	checkStorage(t, lc, 0, 100, 5)
+	checkStorage_singleId(t, lc, 0, 100, 5)
 }
-*/
+
+func TestCompressAddDifferentId(t *testing.T) {
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("compressTime not panic")
+		}
+	}()
+
+	cblock := NewCompressedBlock()
+	cblock.Add(NewMeas(1, 1, 1, 1))
+	cblock.Add(NewMeas(2, 1, 1, 1))
+}
