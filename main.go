@@ -5,24 +5,23 @@ import (
 	"math"
 	"time"
 
-	//"github.com/pkg/profile"
+	"github.com/pkg/profile"
 )
 
 func main() {
-	//defer profile.Start().Stop()
+	defer profile.Start().Stop()
 	fmt.Println("****************")
 	storage := NewMemoryStorage(10000000)
-	iterations := 10000
+	iterations := 100000
 	tm := Time(1)
-	meases := []Meas{}
-	for i := 0; i < iterations; i++ {
-		m := NewMeas(1, tm, int64(math.Sin(float64(i))), Flag(0x002202))
-		tm += Time(1000)
-		meases = append(meases, m)
-	}
+	var m Meas
 	fmt.Println("add:")
 	startTime := time.Now()
-	storage.Add_range(meases)
+	for i := 0; i < iterations; i++ {
+		m = NewMeas(1, tm, int64(math.Sin(float64(i))), Flag(0x002202))
+		tm += Time(1000)
+		storage.Add(m)
+	}
 	endTime := time.Now()
 	fmt.Println("elapsed: ", endTime.Sub(startTime))
 }
