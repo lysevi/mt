@@ -25,6 +25,6 @@ func main() {
 		tm = tm + Time(4000)
 		Val *= 2
 	}
-	endTime := time.Now()
-	fmt.Println("elapsed: ", endTime.Sub(startTime))
+	elapsed := time.Since(startTime)
+	fmt.Println("elapsed: ", elapsed)
 }
