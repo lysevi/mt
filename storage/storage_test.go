@@ -27,7 +27,7 @@ func TestStorageCheck(t *testing.T) {
 
 func TestStorageCacheSync(t *testing.T) {
 	lc := NewStorage()
-	writes_count := CACHE_DEFAULT_SIZE * 2
+	writes_count := defaultCacheSize * 2
 	writes := 0
 	for i := 0; i < writes_count; i++ {
 		m := NewMeas(1, Time(i), int64(i), Flag(i))

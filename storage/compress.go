@@ -8,9 +8,11 @@ import (
 
 var _ = fmt.Sprintf("")
 
-const MAX_BLOCK_SIZE = (1024 * 1024)
-const MAX_BIT = 7
-const MEAS_MAX_SIZE = 33 + 65 + 64 // time max size + flag + value
+const (
+	maxBlockSize          = (1024 * 1024)
+	maxBit                = 7
+	compressedMeasMaxSize = 33 + 65 + 64 // time max size + flag + value
+)
 
 type CompressedBlock struct {
 	id         Id
@@ -28,14 +30,14 @@ type CompressedBlock struct {
 	prevFlag  Flag
 	byteNum   uint64 //cur byte pos
 	bitNum    uint8  //cur bit  pos
-	data      [MAX_BLOCK_SIZE]uint8
+	data      [maxBlockSize]uint8
 }
 
 func NewCompressedBlock() *CompressedBlock {
 	res := CompressedBlock{}
 	res.StartTime = 0
 	res.byteNum = 0
-	res.bitNum = MAX_BIT
+	res.bitNum = maxBit
 	res.firstValue = true
 	res.id = -1
 	return &res
@@ -43,7 +45,7 @@ func NewCompressedBlock() *CompressedBlock {
 
 func (c *CompressedBlock) incByte() {
 	c.byteNum++
-	if c.byteNum >= MAX_BLOCK_SIZE {
+	if c.byteNum >= maxBlockSize {
 		panic("out of bound")
 	}
 }
@@ -51,7 +53,7 @@ func (c *CompressedBlock) incByte() {
 func (c *CompressedBlock) incBit() {
 	c.bitNum--
 	if c.bitNum > 7 { // c.bitNum is uint8. 0-1==255
-		c.bitNum = MAX_BIT
+		c.bitNum = maxBit
 		c.incByte()
 	}
 }
@@ -61,7 +63,7 @@ func (c CompressedBlock) String() string {
 	for i := uint64(0); i <= c.byteNum; i++ {
 		cur_byte := c.data[i]
 		res += fmt.Sprintf("%v: ", i)
-		for j := (MAX_BIT); j >= 0; j-- {
+		for j := (maxBit); j >= 0; j-- {
 			if j == 3 {
 				res += " "
 			}
@@ -102,12 +104,12 @@ func (c *CompressedBlock) write_64(D uint16) {
 	*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 	c.incBit()
 
-	if c.byteNum == MAX_BIT {
+	if c.byteNum == maxBit {
 		cur_byte := &c.data[c.byteNum]
 		*cur_byte = (*cur_byte) | byte(D)
 		c.byteNum++
 	} else {
-		step_h := MAX_BIT - c.bitNum
+		step_h := maxBit - c.bitNum
 		step_l := c.bitNum + 1
 		high := byte(D) >> step_h
 		low := byte(D) << (step_l)
@@ -118,7 +120,7 @@ func (c *CompressedBlock) write_64(D uint16) {
 
 		cur_byte = &c.data[c.byteNum]
 		*cur_byte = (*cur_byte) | low
-		c.bitNum = MAX_BIT - step_h
+		c.bitNum = maxBit - step_h
 	}
 
 }
@@ -516,7 +518,7 @@ func (c *CompressedBlock) Add_range(m []Meas) int64 {
 }
 
 func (c *CompressedBlock) Cap() int64 {
-	in_bytes := int64((MAX_BLOCK_SIZE - c.byteNum) / MEAS_MAX_SIZE)
+	in_bytes := int64((maxBlockSize - c.byteNum) / compressedMeasMaxSize)
 	if !c.firstValue {
 		in_bytes--
 	}
@@ -524,7 +526,7 @@ func (c *CompressedBlock) Cap() int64 {
 }
 
 func (c *CompressedBlock) IsFull() bool {
-	return (MAX_BLOCK_SIZE - c.byteNum) < MEAS_MAX_SIZE
+	return (maxBlockSize - c.byteNum) < compressedMeasMaxSize
 }
 
 func (c *CompressedBlock) Close() {}
@@ -551,14 +553,14 @@ func (c *CompressedBlock) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
 		result = append(result, m)
 	}
 
-	if c.byteNum == 0 && c.bitNum == MAX_BIT {
+	if c.byteNum == 0 && c.bitNum == maxBit {
 		return result
 	}
 
 	bytenum := c.byteNum
 	bitnum := c.bitNum
 	c.byteNum = 0
-	c.bitNum = MAX_BIT
+	c.bitNum = maxBit
 	defer func() {
 		c.byteNum = bytenum
 		c.bitNum = bitnum

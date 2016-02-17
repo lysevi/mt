@@ -19,11 +19,11 @@ type Storage struct {
 	lock          sync.Mutex
 }
 
-const CACHE_DEFAULT_SIZE = 100000
+const defaultCacheSize = 100000
 
 func NewStorage() *Storage {
 	res := &Storage{}
-	res.cache = NewLinearCache(CACHE_DEFAULT_SIZE)
+	res.cache = NewLinearCache(defaultCacheSize)
 	res.mstor = NewMemoryStorage(0)
 	res.stop = make(chan interface{})
 	res.cache_sync = make(chan *LinearCache)
@@ -72,7 +72,7 @@ func (c *Storage) Add(m Meas) bool {
 
 	if !c.cache.Add(m) {
 		old_cache := c.cache
-		c.cache = NewLinearCache(CACHE_DEFAULT_SIZE)
+		c.cache = NewLinearCache(defaultCacheSize)
 		c.cache_sync <- old_cache
 		c.cache.Add(m)
 	}

@@ -68,7 +68,7 @@ func BenchmarkCompressedBlockDeltaTimeRW(b *testing.B) {
 		}
 
 		cblock.byteNum = 0
-		cblock.bitNum = MAX_BIT
+		cblock.bitNum = maxBit
 
 		for i := 0; i < iterations; i++ {
 			cblock.readTime(0)
@@ -90,7 +90,7 @@ func BenchmarkCompressedBlockTimeRW(b *testing.B) {
 			tm *= 2
 		}
 
-		cblock.bitNum = MAX_BIT
+		cblock.bitNum = maxBit
 		cblock.byteNum = 0
 
 		readed_t := Time(cblock.StartTime)
@@ -112,7 +112,7 @@ func BenchmarkCompressedBlockValuesRW(b *testing.B) {
 			delta *= 2
 		}
 
-		cblock.bitNum = MAX_BIT
+		cblock.bitNum = maxBit
 		cblock.byteNum = 0
 
 		readed_v := cblock.startValue
@@ -135,7 +135,7 @@ func BenchmarkCompressedBlockValuesFlags(b *testing.B) {
 			flags = append(flags, i)
 		}
 
-		cblock.bitNum = MAX_BIT
+		cblock.bitNum = maxBit
 		cblock.byteNum = 0
 		readed_flag := cblock.prevFlag
 

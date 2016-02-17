@@ -29,7 +29,7 @@ func TestCompressIncBytePanic(t *testing.T) {
 	}()
 
 	cblock := NewCompressedBlock()
-	cblock.byteNum = MAX_BLOCK_SIZE
+	cblock.byteNum = maxBlockSize
 	cblock.incByte()
 }
 
@@ -213,7 +213,7 @@ func TestCompressRead_64(t *testing.T) {
 	cblock.write_64(res)
 
 	cblock.byteNum = 0
-	cblock.bitNum = MAX_BIT
+	cblock.bitNum = maxBit
 
 	if sr := cblock.readTime(0); sr != 1 {
 		t.Error("sr:", sr, cblock.String())
@@ -240,7 +240,7 @@ func TestCompressRead_256(t *testing.T) {
 	cblock.write_256(res)
 
 	cblock.byteNum = 0
-	cblock.bitNum = MAX_BIT
+	cblock.bitNum = maxBit
 
 	if sr := cblock.readTime(0); sr != 256 {
 		t.Error("sr:", sr, cblock.String())
@@ -267,7 +267,7 @@ func TestCompressRead_2048(t *testing.T) {
 	cblock.write_2048(res)
 
 	cblock.byteNum = 0
-	cblock.bitNum = MAX_BIT
+	cblock.bitNum = maxBit
 
 	if sr := cblock.readTime(0); sr != 2048 {
 		t.Error("sr:", sr, cblock.String())
@@ -294,7 +294,7 @@ func TestCompressRead_big(t *testing.T) {
 	cblock.write_big(res)
 
 	cblock.byteNum = 0
-	cblock.bitNum = MAX_BIT
+	cblock.bitNum = maxBit
 
 	if sr := cblock.readTime(0); sr != 2049 {
 		t.Error("sr:", sr, cblock.String())
@@ -331,7 +331,7 @@ func TestCompressReadAll(t *testing.T) {
 	}
 
 	cblock.byteNum = 0
-	cblock.bitNum = MAX_BIT
+	cblock.bitNum = maxBit
 
 	for i := 0; i < iterations; i++ {
 		t_1 := cblock.readTime(0)
@@ -381,7 +381,7 @@ func TestCompressTimeWrite(t *testing.T) {
 		tm *= 2
 	}
 
-	cblock.bitNum = MAX_BIT
+	cblock.bitNum = maxBit
 	cblock.byteNum = 0
 
 	readed_t := Time(cblock.StartTime)
@@ -397,7 +397,7 @@ func TestCompressValue(t *testing.T) {
 	{
 		cblock := NewCompressedBlock()
 		cblock.compressValue(10, 10, 0, 0)
-		if cblock.data[0] != 0 || cblock.bitNum != MAX_BIT-1 {
+		if cblock.data[0] != 0 || cblock.bitNum != maxBit-1 {
 			t.Error("value compress on equals: ", cblock.data[0], cblock.String())
 		}
 	}
@@ -462,7 +462,7 @@ func TestCompressValue(t *testing.T) {
 		v2 := uint64(240)
 		cblock.writeValue(v1)
 		cblock.writeValue(v2)
-		cblock.bitNum = MAX_BIT
+		cblock.bitNum = maxBit
 		cblock.byteNum = 0
 
 		res := cblock.readValue(cblock.prevValue)
@@ -480,7 +480,7 @@ func TestCompressValue(t *testing.T) {
 		cblock.writeValue(v1)
 		cblock.writeValue(v2)
 		cblock.writeValue(v3)
-		cblock.bitNum = MAX_BIT
+		cblock.bitNum = maxBit
 		cblock.byteNum = 0
 
 		res := cblock.readValue(cblock.startValue)
@@ -507,7 +507,7 @@ func TestCompressValue(t *testing.T) {
 		cblock.writeValue(1)
 		cblock.writeValue(v1)
 		cblock.writeValue(v2)
-		cblock.bitNum = MAX_BIT
+		cblock.bitNum = maxBit
 		cblock.byteNum = 0
 
 		res := cblock.readValue(cblock.startValue)
@@ -529,7 +529,7 @@ func TestCompressValue(t *testing.T) {
 		cblock.writeValue(0)
 		cblock.writeValue(v1)
 		cblock.writeValue(v2)
-		cblock.bitNum = MAX_BIT
+		cblock.bitNum = maxBit
 		cblock.byteNum = 0
 
 		res := cblock.readValue(cblock.startValue)
@@ -558,7 +558,7 @@ func TestCompressValue(t *testing.T) {
 			t.Error("cblock.startValue != 0", cblock.startValue)
 		}
 
-		cblock.bitNum = MAX_BIT
+		cblock.bitNum = maxBit
 		cblock.byteNum = 0
 
 		readed_v := cblock.startValue
@@ -579,7 +579,7 @@ func TestCompressFlag(t *testing.T) {
 		cblock.firstValue = false
 		cblock.writeFlag(10)
 
-		if cblock.data[0] != 0 || cblock.byteNum != 0 || cblock.bitNum != MAX_BIT-1 {
+		if cblock.data[0] != 0 || cblock.byteNum != 0 || cblock.bitNum != maxBit-1 {
 			t.Error(cblock.data[0], cblock.byteNum, cblock.bitNum)
 		}
 
@@ -610,7 +610,7 @@ func TestCompressFlag(t *testing.T) {
 			flags = append(flags, i)
 		}
 
-		cblock.bitNum = MAX_BIT
+		cblock.bitNum = maxBit
 		cblock.byteNum = 0
 		readed_flag := cblock.prevFlag
 
