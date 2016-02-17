@@ -215,15 +215,16 @@ func TestCompressRead_64(t *testing.T) {
 	cblock.byteNum = 0
 	cblock.bitNum = maxBit
 
-	if sr := cblock.readTime(0); sr != 1 {
+	rs := newReadStatus()
+	if sr := cblock.readTime(0, &rs); sr != 1 {
 		t.Error("sr:", sr, cblock.String())
 	}
 
-	if sr := cblock.readTime(0); sr != 64 {
+	if sr := cblock.readTime(0, &rs); sr != 64 {
 		t.Error("sr:", sr)
 	}
 
-	if sr := cblock.readTime(0); sr != 63 {
+	if sr := cblock.readTime(0, &rs); sr != 63 {
 		t.Error("sr:", sr)
 	}
 }
@@ -239,18 +240,16 @@ func TestCompressRead_256(t *testing.T) {
 	res = cblock.delta_256(65)
 	cblock.write_256(res)
 
-	cblock.byteNum = 0
-	cblock.bitNum = maxBit
-
-	if sr := cblock.readTime(0); sr != 256 {
+	rs := newReadStatus()
+	if sr := cblock.readTime(0, &rs); sr != 256 {
 		t.Error("sr:", sr, cblock.String())
 	}
 
-	if sr := cblock.readTime(0); sr != 255 {
+	if sr := cblock.readTime(0, &rs); sr != 255 {
 		t.Error("sr:", sr)
 	}
 
-	if sr := cblock.readTime(0); sr != 65 {
+	if sr := cblock.readTime(0, &rs); sr != 65 {
 		t.Error("sr:", sr)
 	}
 }
@@ -266,18 +265,17 @@ func TestCompressRead_2048(t *testing.T) {
 	res = cblock.delta_2048(4095)
 	cblock.write_2048(res)
 
-	cblock.byteNum = 0
-	cblock.bitNum = maxBit
+	rs := newReadStatus()
 
-	if sr := cblock.readTime(0); sr != 2048 {
+	if sr := cblock.readTime(0, &rs); sr != 2048 {
 		t.Error("sr:", sr, cblock.String())
 	}
 
-	if sr := cblock.readTime(0); sr != 257 {
+	if sr := cblock.readTime(0, &rs); sr != 257 {
 		t.Error("sr:", sr)
 	}
 
-	if sr := cblock.readTime(0); sr != 4095 {
+	if sr := cblock.readTime(0, &rs); sr != 4095 {
 		t.Error("sr:", sr)
 	}
 }
@@ -293,18 +291,16 @@ func TestCompressRead_big(t *testing.T) {
 	res = cblock.delta_big(4095)
 	cblock.write_big(res)
 
-	cblock.byteNum = 0
-	cblock.bitNum = maxBit
-
-	if sr := cblock.readTime(0); sr != 2049 {
+	rs := newReadStatus()
+	if sr := cblock.readTime(0, &rs); sr != 2049 {
 		t.Error("sr:", sr, cblock.String())
 	}
 
-	if sr := cblock.readTime(0); sr != 65535 {
+	if sr := cblock.readTime(0, &rs); sr != 65535 {
 		t.Error("sr:", sr)
 	}
 
-	if sr := cblock.readTime(0); sr != 4095 {
+	if sr := cblock.readTime(0, &rs); sr != 4095 {
 		t.Error("sr:", sr)
 	}
 }
@@ -330,22 +326,20 @@ func TestCompressReadAll(t *testing.T) {
 		cblock.write_big(cblock.delta_big(4095))
 	}
 
-	cblock.byteNum = 0
-	cblock.bitNum = maxBit
-
+	rs := newReadStatus()
 	for i := 0; i < iterations; i++ {
-		t_1 := cblock.readTime(0)
-		t_64 := cblock.readTime(0)
-		t_63 := cblock.readTime(0)
+		t_1 := cblock.readTime(0, &rs)
+		t_64 := cblock.readTime(0, &rs)
+		t_63 := cblock.readTime(0, &rs)
 		if t_1 != 1 || t_64 != 64 || t_63 != 64 {
 			t.Error("d64 read error i:", i, t_1, t_64, t_63)
 			fmt.Print(cblock.String())
 			return
 		}
 
-		t_256 := cblock.readTime(0)
-		t_255 := cblock.readTime(0)
-		t_65 := cblock.readTime(0)
+		t_256 := cblock.readTime(0, &rs)
+		t_255 := cblock.readTime(0, &rs)
+		t_65 := cblock.readTime(0, &rs)
 
 		if t_256 != 256 || t_255 != 255 || t_65 != 65 {
 			t.Error("d256 read error i:", i, t_256, t_255, t_65)
@@ -353,16 +347,16 @@ func TestCompressReadAll(t *testing.T) {
 			return
 		}
 
-		t_2048 := cblock.readTime(0)
-		t_257 := cblock.readTime(0)
-		t_4095 := cblock.readTime(0)
+		t_2048 := cblock.readTime(0, &rs)
+		t_257 := cblock.readTime(0, &rs)
+		t_4095 := cblock.readTime(0, &rs)
 		if t_2048 != 2048 || t_257 != 257 || t_4095 != 4095 {
 			t.Error("2048 error:", t_2048, t_257, t_4095, cblock.String())
 		}
 
-		t_2049 := cblock.readTime(0)
-		t_65535 := cblock.readTime(0)
-		t_4095 = cblock.readTime(0)
+		t_2049 := cblock.readTime(0, &rs)
+		t_65535 := cblock.readTime(0, &rs)
+		t_4095 = cblock.readTime(0, &rs)
 		if t_2049 != 2049 || t_65535 != 65535 || t_4095 != 4095 {
 			t.Error("2048 error:", t_2048, t_257, t_4095, cblock.String())
 		}
@@ -381,12 +375,10 @@ func TestCompressTimeWrite(t *testing.T) {
 		tm *= 2
 	}
 
-	cblock.bitNum = maxBit
-	cblock.byteNum = 0
-
+	rs := newReadStatus()
 	readed_t := Time(cblock.StartTime)
 	for _, tm = range times {
-		readed_t = cblock.readTime(readed_t)
+		readed_t = cblock.readTime(readed_t, &rs)
 		if readed_t != tm {
 			t.Error("read error:", readed_t, tm)
 		}
@@ -462,10 +454,10 @@ func TestCompressValue(t *testing.T) {
 		v2 := uint64(240)
 		cblock.writeValue(v1)
 		cblock.writeValue(v2)
-		cblock.bitNum = maxBit
-		cblock.byteNum = 0
 
-		res := cblock.readValue(cblock.prevValue)
+		rs := newReadStatus()
+		rs.prevValue = cblock.prevValue
+		res := cblock.readValue(cblock.prevValue, &rs)
 		if res != v2 {
 			t.Error("res!=v2", res, v2)
 		}
@@ -480,20 +472,23 @@ func TestCompressValue(t *testing.T) {
 		cblock.writeValue(v1)
 		cblock.writeValue(v2)
 		cblock.writeValue(v3)
-		cblock.bitNum = maxBit
-		cblock.byteNum = 0
 
-		res := cblock.readValue(cblock.startValue)
+		rs := newReadStatus()
+		rs.startValue = cblock.startValue
+		rs.prevValue = cblock.prevValue
+		rs.prevLead = cblock.prevLead
+		rs.prevTail = cblock.prevTail
+		res := cblock.readValue(rs.startValue, &rs)
 		if res != v1 {
-			t.Error("res!=v2", res, v1)
+			t.Error("res!=v1", res, v1)
 		}
 
-		res = cblock.readValue(res)
+		res = cblock.readValue(res, &rs)
 		if res != v2 {
 			t.Error("res!=v2", res, v2)
 		}
 
-		res = cblock.readValue(res)
+		res = cblock.readValue(res, &rs)
 		if res != v3 {
 			t.Error("res!=v3", res, v3)
 		}
@@ -507,15 +502,17 @@ func TestCompressValue(t *testing.T) {
 		cblock.writeValue(1)
 		cblock.writeValue(v1)
 		cblock.writeValue(v2)
-		cblock.bitNum = maxBit
-		cblock.byteNum = 0
-
-		res := cblock.readValue(cblock.startValue)
+		rs := newReadStatus()
+		rs.startValue = cblock.startValue
+		rs.prevValue = cblock.prevValue
+		rs.prevLead = cblock.prevLead
+		rs.prevTail = cblock.prevTail
+		res := cblock.readValue(rs.startValue, &rs)
 		if res != v1 {
-			t.Error("res!=cblock.startValue", res, cblock.startValue)
+			t.Error("res!=cblock.startValue", res, rs.startValue)
 		}
 
-		res = cblock.readValue(res)
+		res = cblock.readValue(res, &rs)
 		if res != v2 {
 			t.Error("res!=v2", res, v2)
 		}
@@ -529,15 +526,16 @@ func TestCompressValue(t *testing.T) {
 		cblock.writeValue(0)
 		cblock.writeValue(v1)
 		cblock.writeValue(v2)
-		cblock.bitNum = maxBit
-		cblock.byteNum = 0
-
-		res := cblock.readValue(cblock.startValue)
+		rs := newReadStatus()
+		rs.prevValue = cblock.prevValue
+		rs.prevLead = cblock.prevLead
+		rs.prevTail = cblock.prevTail
+		res := cblock.readValue(cblock.startValue, &rs)
 		if res != v1 {
 			t.Error("res!=cblock.startValue", res, cblock.startValue)
 		}
 
-		res = cblock.readValue(res)
+		res = cblock.readValue(res, &rs)
 		if res != v2 {
 			t.Error("res!=v2", res, v2)
 		}
@@ -558,12 +556,16 @@ func TestCompressValue(t *testing.T) {
 			t.Error("cblock.startValue != 0", cblock.startValue)
 		}
 
-		cblock.bitNum = maxBit
-		cblock.byteNum = 0
+		rs := newReadStatus()
+		rs.startValue = cblock.startValue
+		rs.prevValue = cblock.prevValue
+		rs.prevLead = cblock.prevLead
+		rs.prevTail = cblock.prevTail
 
 		readed_v := cblock.startValue
+
 		for i, v := range values[1:] {
-			readed_v = cblock.readValue(readed_v)
+			readed_v = cblock.readValue(readed_v, &rs)
 			if readed_v != v {
 				t.Error("readed_v!=v", i, readed_v, v)
 			}
@@ -610,17 +612,15 @@ func TestCompressFlag(t *testing.T) {
 			flags = append(flags, i)
 		}
 
-		cblock.bitNum = maxBit
-		cblock.byteNum = 0
 		readed_flag := cblock.prevFlag
-
+		rs := newReadStatus()
 		for i, v := range flags {
-			readed_flag = cblock.readFlag(readed_flag)
+			readed_flag = cblock.readFlag(readed_flag, &rs)
 			if readed_flag != v {
 				t.Error("readed_flag!=v", i, readed_flag, v, cblock.String())
 			}
 
-			readed_flag = cblock.readFlag(readed_flag)
+			readed_flag = cblock.readFlag(readed_flag, &rs)
 			if readed_flag != v {
 				t.Error("readed_flag!=v", i, readed_flag, v, cblock.String())
 			}
