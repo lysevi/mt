@@ -1,4 +1,4 @@
-package main
+package storage
 
 // paper http://www.vldb.org/pvldb/vol8/p1816-teller.pdf
 

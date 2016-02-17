@@ -1,4 +1,4 @@
-package main
+package storage
 
 func idFltr(ids []Id, idV Id) bool {
 	if len(ids) == 0 {

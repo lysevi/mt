@@ -1,4 +1,4 @@
-package main
+package storage
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ func TestStorageCheck(t *testing.T) {
 	lc.Close()
 }
 
-func TestMemoryStorageCacheSync(t *testing.T) {
+func TestStorageCacheSync(t *testing.T) {
 	lc := NewStorage()
 	writes_count := CACHE_DEFAULT_SIZE * 2
 	writes := 0

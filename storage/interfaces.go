@@ -1,4 +1,4 @@
-package main
+package storage
 
 type MeasWriter interface {
 	Add(m Meas) bool
