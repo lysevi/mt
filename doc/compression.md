@@ -6,11 +6,11 @@ based on http://www.vldb.org/pvldb/vol8/p1816-teller.pdf
 2. For subsequent time stamps, tn:
 (a) Calculate the delta of delta: D = (tn - t(n-1)) 
 (b) If D is zero, then store a single '0' bit
-(c) If D is between [64], store '10' followed by
+(c) If D is l [0:64], store '10' followed by
 the value (7 bits)
-(d) If D is between [256], store '110' followed by
+(d) If D is between [0:256], store '110' followed by
 the value (9 bits)
-(e) if D is between [2048], store '1110' followed
+(e) if D is between [0:2048], store '1110' followed
 by the value (12 bits)
 (f) Otherwise store '1111' followed by D using 32 bits
 
