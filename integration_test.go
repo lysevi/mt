@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"testing"
-	_ "time"
+	"time"
 )
 
 var _ = fmt.Sprintf("")
@@ -15,7 +14,7 @@ func TestIntegrationCompressedBlock(t *testing.T) {
 	tm := Time(1)
 	meases := []Meas{}
 	for i := 0; i < iterations; i++ {
-		m := NewMeas(1, tm, int64(math.Sin(float64(i))), Flag(0x002202))
+		m := NewMeas(1, tm, int64(i), Flag(0x002202))
 		tm += Time(1000)
 		meases = append(meases, m)
 	}
@@ -41,19 +40,26 @@ func TestIntegrationCompressedBlock(t *testing.T) {
 	}
 }
 
-//func TestIntegrationMemoryStorage(t *testing.T) {
-//	storage := NewMemoryStorage(10000000)
-//	iterations := 1000000
-//	tm := Time(1)
-//	meases := []Meas{}
-//	for i := 0; i < iterations; i++ {
-//		m := NewMeas(1, tm, int64(i), Flag(0x002202))
-//		tm += Time(1000)
-//		meases = append(meases, m)
-//	}
-//	fmt.Println("add:")
-//	startTime := time.Now()
-//	storage.Add_range(meases)
-//	endTime := time.Now()
-//	fmt.Println("elapsed: ", endTime.Sub(startTime))
-//}
+func TestIntegrationMemoryStorage(t *testing.T) {
+	storage := NewMemoryStorage(10000000)
+	iterations := 250000
+	tm := Time(1)
+	var Val int64 = 1
+
+	fmt.Println("add:")
+	startTime := time.Now()
+	for i := 0; i < iterations; i++ {
+		storage.Add(NewMeas(1, tm+Time(10), Val, Flag(0x002202)))
+		storage.Add(NewMeas(1, tm+Time(250), Val, Flag(0x1)))
+		storage.Add(NewMeas(1, tm+Time(1000), Val, Flag(0x002202)))
+		storage.Add(NewMeas(1, tm+Time(4000), Val, Flag(0x002202)))
+		tm = tm + Time(4000)
+		Val *= 2
+	}
+	elapsed := time.Since(startTime)
+	const OneSecond = time.Duration(1) * time.Second
+
+	if elapsed > (OneSecond) {
+		t.Error("so slow: ", elapsed)
+	}
+}

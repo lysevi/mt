@@ -81,37 +81,19 @@ func (c CompressedBlock) String() string {
 }
 
 func (c CompressedBlock) delta_64(t Time) uint16 {
-	res := uint16(t)
-	res = setBit16(res, 8, 1)
-	return res
+	return uint16(t) | uint16(256)
 }
 
 func (c CompressedBlock) delta_256(t Time) uint16 {
-	res := uint16(t)
-	res = setBit16(res, 11, 1)
-	res = setBit16(res, 10, 1)
-	res = setBit16(res, 9, 0)
-	return res
+	return uint16(t) | uint16(3072)
 }
 
 func (c CompressedBlock) delta_2048(t Time) uint16 {
-	res := uint16(t)
-	res = setBit16(res, 15, 1)
-	res = setBit16(res, 14, 1)
-	res = setBit16(res, 13, 1)
-	res = setBit16(res, 12, 0)
-
-	return res
+	return uint16(t) | uint16(57344)
 }
 
 func (c CompressedBlock) delta_big(t Time) uint64 {
-	res := uint64(t)
-	res = setBit64(res, 35, 1)
-	res = setBit64(res, 34, 1)
-	res = setBit64(res, 33, 1)
-	res = setBit64(res, 32, 1)
-
-	return res
+	return uint64(t) | uint64(64424509440)
 }
 
 func (c *CompressedBlock) write_64(D uint16) {
@@ -120,30 +102,25 @@ func (c *CompressedBlock) write_64(D uint16) {
 	*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
 	c.incBit()
 
-	//	if c.byteNum == MAX_BIT {
-	//		cur_byte := &c.data[c.byteNum]
-	//		*cur_byte = (*cur_byte) | byte(D)
-	//		c.byteNum++
-	//	} else {
-	//		step_h := MAX_BIT - c.bitNum
-	//		step_l := c.bitNum + 1
-	//		high := byte(D) >> step_h
-	//		low := byte(D) << (step_l)
-
-	//		cur_byte := &c.data[c.byteNum]
-	//		*cur_byte = (*cur_byte) | high
-	//		c.byteNum++
-
-	//		cur_byte = &c.data[c.byteNum]
-	//		*cur_byte = (*cur_byte) | low
-	//		c.bitNum = MAX_BIT - step_h
-	//	}
-	for i := int8(7); i >= 0; i-- {
-		bvalue = getBit16(D, uint8(i))
+	if c.byteNum == MAX_BIT {
 		cur_byte := &c.data[c.byteNum]
-		*cur_byte = setBit(*cur_byte, c.bitNum, bvalue)
-		c.incBit()
+		*cur_byte = (*cur_byte) | byte(D)
+		c.byteNum++
+	} else {
+		step_h := MAX_BIT - c.bitNum
+		step_l := c.bitNum + 1
+		high := byte(D) >> step_h
+		low := byte(D) << (step_l)
+
+		cur_byte := &c.data[c.byteNum]
+		*cur_byte = (*cur_byte) | high
+		c.byteNum++
+
+		cur_byte = &c.data[c.byteNum]
+		*cur_byte = (*cur_byte) | low
+		c.bitNum = MAX_BIT - step_h
 	}
+
 }
 
 func (c *CompressedBlock) write_256(D uint16) {
@@ -292,15 +269,19 @@ func (c *CompressedBlock) writeTime(t Time) {
 		c.incBit()
 	} else {
 		if D < 127 {
-			c.write_64(c.delta_64(Time(D)))
+			c.write_64(uint16(D) | uint16(256))
+			//c.write_64(c.delta_64(Time(D)))
 		} else {
 			if D < 511 {
-				c.write_256(c.delta_256(Time(D)))
+				c.write_256(uint16(D) | uint16(3072))
+				//c.write_256(c.delta_256(Time(D)))
 			} else {
 				if D < 4095 {
-					c.write_2048(c.delta_2048(Time(D)))
+					c.write_2048(uint16(D) | uint16(57344))
+					//c.write_2048(c.delta_2048(Time(D)))
 				} else {
-					c.write_big(c.delta_big(Time(D)))
+					c.write_big(uint64(D) | uint64(64424509440))
+					//c.write_big(c.delta_big(Time(D)))
 				}
 			}
 		}

@@ -11,15 +11,19 @@ func main() {
 	defer profile.Start().Stop()
 	fmt.Println("****************")
 	storage := NewMemoryStorage(10000000)
-	iterations := 100000
+	iterations := 250000
 	tm := Time(1)
-	var m Meas
+	var Val int64 = 1
+
 	fmt.Println("add:")
 	startTime := time.Now()
 	for i := 0; i < iterations; i++ {
-		m = NewMeas(1, tm, int64(i), Flag(0x002202))
-		tm += Time(10)
-		storage.Add(m)
+		storage.Add(NewMeas(1, tm+Time(10), Val, Flag(0x002202)))
+		storage.Add(NewMeas(1, tm+Time(250), Val, Flag(0x1)))
+		storage.Add(NewMeas(1, tm+Time(1000), Val, Flag(0x002202)))
+		storage.Add(NewMeas(1, tm+Time(4000), Val, Flag(0x002202)))
+		tm = tm + Time(4000)
+		Val *= 2
 	}
 	endTime := time.Now()
 	fmt.Println("elapsed: ", endTime.Sub(startTime))
