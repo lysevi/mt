@@ -15,7 +15,7 @@ type Storage struct {
 	wg            sync.WaitGroup
 	stop          chan interface{}
 	cache_sync    chan *LinearCache
-	sync_complete bool
+	sync_complete sync.WaitGroup
 	lock          sync.Mutex
 }
 
@@ -27,7 +27,6 @@ func NewStorage() *Storage {
 	res.mstor = NewMemoryStorage(0)
 	res.stop = make(chan interface{})
 	res.cache_sync = make(chan *LinearCache)
-	res.sync_complete = true
 	res.wg.Add(1)
 	go res.cacheSync()
 	return res
@@ -38,7 +37,7 @@ func (c *Storage) cacheSync() {
 		var ch *LinearCache = nil
 		select {
 		case ch = <-c.cache_sync:
-			c.sync_complete = false
+			c.sync_complete.Add(1)
 
 			all := ch.ReadAll()
 			id2meases := make(map[Id]MeasByTime)
@@ -57,7 +56,7 @@ func (c *Storage) cacheSync() {
 				c.mstor.Add_range(sorted_vals)
 			}
 
-			c.sync_complete = true
+			c.sync_complete.Done()
 
 		case <-c.stop:
 			c.wg.Done()
@@ -100,11 +99,7 @@ func (c *Storage) IsFull() bool {
 	return c.mstor.IsFull()
 }
 func (c *Storage) WaitSync() {
-	for {
-		if c.sync_complete {
-			break
-		}
-	}
+	c.sync_complete.Wait()
 }
 func (c *Storage) Close() {
 	c.WaitSync()
