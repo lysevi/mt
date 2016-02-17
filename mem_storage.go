@@ -10,6 +10,7 @@ var _ = fmt.Sprintf("")
 type MemoryStorage struct {
 	max_time Time
 	cblocks  []*CompressedBlock
+	archive  []*CompressedBlock
 	lock     sync.Mutex
 }
 
@@ -18,6 +19,23 @@ func NewMemoryStorage(sz int64) *MemoryStorage {
 	res.max_time = 0
 	res.cblocks = append(res.cblocks, NewCompressedBlock())
 	return res
+}
+
+func (c *MemoryStorage) updateArchive() {
+	indexes := []int{}
+	for i, v := range c.cblocks {
+		if v.IsFull() {
+			indexes = append(indexes, i)
+		}
+	}
+
+	removed := 0
+	for index := range indexes {
+		pos := removed + index
+		c.archive = append(c.archive, c.cblocks[pos])
+		c.cblocks = append(c.cblocks[:pos], c.cblocks[pos+1:]...)
+		removed++
+	}
 }
 
 func (c *MemoryStorage) Add(m Meas) bool {
@@ -42,6 +60,9 @@ func (c *MemoryStorage) Add(m Meas) bool {
 		success = freeBlock.Add(m)
 		c.cblocks = append(c.cblocks, freeBlock)
 	}
+
+	c.updateArchive()
+
 	c.lock.Unlock()
 	return success
 }
@@ -80,6 +101,11 @@ func (c *MemoryStorage) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
 	res := []Meas{}
 
 	for _, v := range c.cblocks {
+		subres := v.ReadFltr(ids, flg, from, to)
+		res = append(res, subres...)
+	}
+
+	for _, v := range c.archive {
 		subres := v.ReadFltr(ids, flg, from, to)
 		res = append(res, subres...)
 	}

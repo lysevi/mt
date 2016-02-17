@@ -7,6 +7,7 @@ import (
 )
 
 var _ = fmt.Sprintf("")
+
 func TestMemoryStorageAddSingle(t *testing.T) {
 	lc := NewMemoryStorage(200)
 	lc.Add(NewMeas(11, 3, 3, 2))
@@ -81,5 +82,22 @@ func TestMemoryStorageThreads(t *testing.T) {
 
 	if len(all) != 2*write_count {
 		t.Error(len(all))
+	}
+}
+
+func TestMemoryStorageArchive(t *testing.T) {
+	lc := NewMemoryStorage(1000)
+	i := 1
+	for {
+		m := NewMeas(1, Time(i), int64(i), Flag(i))
+		lc.Add(m)
+		if len(lc.archive) != 0 {
+			break
+		}
+		i++
+	}
+	all := lc.ReadAll()
+	if len(all) != i {
+		t.Error(len(all), i)
 	}
 }
