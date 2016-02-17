@@ -682,6 +682,13 @@ func TestCompresseBlockAddOne(t *testing.T) {
 	}
 }
 
+func TestCompresseReadFromEmpty(t *testing.T) {
+	lc := NewCompressedBlock()
+	if all := lc.ReadAll(); len(all) != 0 {
+		t.Error("read from empty error")
+	}
+}
+
 func TestCompresseBlockMeasAdd(t *testing.T) {
 	lc := NewCompressedBlock()
 	checkCompressWriterAdd(t, lc)
