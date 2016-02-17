@@ -66,7 +66,7 @@ func TestIntegrationMemoryStorage(t *testing.T) {
 
 func TestIntegrationStorage(t *testing.T) {
 	storage := NewStorage()
-	iterations := 500000
+	iterations := 250000
 	tm := Time(1)
 	var Val int64 = 1
 

@@ -11,7 +11,7 @@ func main() {
 	//defer profile.Start().Stop()
 	fmt.Println("****************")
 	storage := NewStorage()
-	iterations := 500000
+	iterations := 250000
 	tm := Time(1)
 	var Val int64 = 1
 

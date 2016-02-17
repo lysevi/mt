@@ -69,12 +69,18 @@ func checkStorageAddRange(t *testing.T, storage MeasWriter) {
 
 func checkStorage(t *testing.T, storage MeasStorage, from, to, step Time) {
 	checkAll := func(res []Meas, msg string) {
-		i := from
-		for _, m := range res {
-			if m.Id != Id(i) || m.Flg != Flag(i) || m.Tstamp != Time(i) {
-				t.Error("msg: ", m)
+
+		for i := from; i < to; i += step {
+			err := true
+			for _, m := range res {
+				if m.Id == Id(i) || m.Flg == Flag(i) || m.Tstamp == Time(i) {
+					err = false
+					break
+				}
 			}
-			i += step
+			if err {
+				t.Error("m: ", i)
+			}
 		}
 	}
 

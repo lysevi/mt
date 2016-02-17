@@ -19,7 +19,7 @@ type Storage struct {
 	lock          sync.Mutex
 }
 
-const CACHE_DEFAULT_SIZE = 1000000
+const CACHE_DEFAULT_SIZE = 100000
 
 func NewStorage() *Storage {
 	res := &Storage{}
@@ -39,6 +39,7 @@ func (c *Storage) cacheSync() {
 		select {
 		case ch = <-c.cache_sync:
 			c.sync_complete = false
+
 			all := ch.ReadAll()
 			id2meases := make(map[Id]MeasByTime)
 			for _, v := range all {
@@ -57,6 +58,7 @@ func (c *Storage) cacheSync() {
 			}
 
 			c.sync_complete = true
+
 		case <-c.stop:
 			c.wg.Done()
 			break
@@ -73,6 +75,7 @@ func (c *Storage) Add(m Meas) bool {
 		old_cache := c.cache
 		c.cache = NewLinearCache(CACHE_DEFAULT_SIZE)
 		c.cache_sync <- old_cache
+		c.cache.Add(m)
 	}
 
 	return true
@@ -96,22 +99,41 @@ func (c *Storage) Cap() int64 {
 func (c *Storage) IsFull() bool {
 	return c.mstor.IsFull()
 }
-
+func (c *Storage) WaitSync() {
+	for {
+		if c.sync_complete {
+			break
+		}
+	}
+}
 func (c *Storage) Close() {
+	c.WaitSync()
 	c.stop <- 1
 	c.wg.Wait()
 }
 
 func (c *Storage) ReadAll() []Meas {
-	return append(c.cache.ReadAll(), c.mstor.ReadAll()...)
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	c.WaitSync()
+	from_cache := c.cache.ReadAll()
+	from_stor := c.mstor.ReadAll()
+	return append(from_cache, from_stor...)
 }
 func (c *Storage) Read(ids []Id, from, to Time) []Meas {
 	return append(c.cache.ReadFltr(ids, 0, from, to), c.mstor.ReadFltr(ids, 0, from, to)...)
 }
 func (c *Storage) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
 	c.lock.Lock()
+
 	defer c.lock.Unlock()
-	return append(c.cache.ReadFltr(ids, flg, from, to), c.mstor.ReadFltr(ids, flg, from, to)...)
+
+	c.WaitSync()
+
+	from_cache := c.cache.ReadFltr(ids, flg, from, to)
+	from_stor := c.mstor.ReadFltr(ids, flg, from, to)
+	return append(from_cache, from_stor...)
 }
 
 func (c *Storage) TimePoint(ids []Id, time Time) []Meas {
