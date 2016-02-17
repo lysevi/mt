@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"testing"
 )
 
@@ -23,5 +24,21 @@ func TestMeasEqual(t *testing.T) {
 	}
 	if measEqual(m1, m2) {
 		t.Error(" equal", m1, m2)
+	}
+}
+
+func TestMeasSort(t *testing.T) {
+	var m MeasByTime
+
+	m = append(m, NewMeas(0, 0, 2, 3))
+	m = append(m, NewMeas(0, 1, 2, 3))
+	m = append(m, NewMeas(0, 2, 2, 3))
+	sort.Sort(m)
+
+	for i, v := range m {
+		if Time(i) != v.Tstamp {
+			t.Error("sort by time error ", m)
+			break
+		}
 	}
 }

@@ -15,6 +15,22 @@ type Meas struct {
 	Flg    Flag
 }
 
+type MeasByTime []Meas
+
+func (m MeasByTime) Len() int {
+	return len(m)
+}
+
+func (m MeasByTime) Less(i, j int) bool {
+	return m[i].Tstamp < m[j].Tstamp
+}
+
+func (m MeasByTime) Swap(i, j int) {
+	t := m[i]
+	m[i] = m[j]
+	m[j] = t
+}
+
 func NewMeas(Id Id, Tstamp Time, Value int64, Flg Flag) Meas {
 	m := Meas{}
 	m.Id = Id
