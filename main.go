@@ -15,7 +15,6 @@ func main() {
 	tm := Time(1)
 	var Val int64 = 1
 
-	fmt.Println("add:")
 	startTime := time.Now()
 	for i := 0; i < iterations; i++ {
 		storage.Add(NewMeas(1, tm+Time(10), Val, Flag(0x002202)))
