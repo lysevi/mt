@@ -24,7 +24,8 @@ func main() {
 		tm = tm + Time(4000)
 		Val *= 2
 	}
-	storage.Close()
+	storage.WaitSync()
 	elapsed := time.Since(startTime)
 	fmt.Println("elapsed: ", elapsed)
+	storage.Close()
 }

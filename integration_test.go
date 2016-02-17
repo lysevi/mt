@@ -79,9 +79,11 @@ func TestIntegrationStorage(t *testing.T) {
 		tm = tm + Time(4000)
 		Val *= 2
 	}
-	storage.Close()
+	storage.WaitSync()
 	elapsed := time.Since(startTime)
 	if elapsed > (OneSecond) {
 		t.Error("so slow: ", elapsed)
 	}
+
+	storage.Close()
 }
