@@ -64,7 +64,7 @@ func TestMemoryStorageThreads(t *testing.T) {
 		}
 	}
 	var stop bool = false
-	const write_count = 1000
+	const write_count = 100
 	wg := sync.WaitGroup{}
 	go f_reader(100, lc, &wg, &stop)
 	wg.Add(1)

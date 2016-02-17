@@ -40,6 +40,7 @@ func (c *MemoryStorage) updateArchive() {
 
 func (c *MemoryStorage) Add(m Meas) bool {
 	c.lock.Lock()
+	defer c.lock.Unlock()
 	if c.max_time < m.Tstamp {
 		c.max_time = m.Tstamp
 	}
@@ -63,7 +64,6 @@ func (c *MemoryStorage) Add(m Meas) bool {
 
 	c.updateArchive()
 
-	c.lock.Unlock()
 	return success
 }
 
@@ -98,6 +98,7 @@ func (c *MemoryStorage) Read(ids []Id, from, to Time) []Meas {
 }
 func (c *MemoryStorage) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
 	c.lock.Lock()
+	defer c.lock.Unlock()
 	res := []Meas{}
 
 	for _, v := range c.cblocks {
@@ -109,7 +110,7 @@ func (c *MemoryStorage) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
 		subres := v.ReadFltr(ids, flg, from, to)
 		res = append(res, subres...)
 	}
-	c.lock.Unlock()
+
 	return res
 }
 
