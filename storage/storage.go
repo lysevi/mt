@@ -16,7 +16,7 @@ type Storage struct {
 	stop          chan interface{}
 	cache_sync    chan *LinearCache
 	sync_complete sync.WaitGroup
-	lock          sync.Mutex
+	lock          sync.RWMutex
 }
 
 const defaultCacheSize = 100000
@@ -108,8 +108,8 @@ func (c *Storage) Close() {
 }
 
 func (c *Storage) ReadAll() []Meas {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.lock.RLock()
+	defer c.lock.RUnlock()
 
 	c.WaitSync()
 	from_cache := c.cache.ReadAll()
@@ -120,9 +120,8 @@ func (c *Storage) Read(ids []Id, from, to Time) []Meas {
 	return append(c.cache.ReadFltr(ids, 0, from, to), c.mstor.ReadFltr(ids, 0, from, to)...)
 }
 func (c *Storage) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
-	c.lock.Lock()
-
-	defer c.lock.Unlock()
+	c.lock.RLock()
+	defer c.lock.RUnlock()
 
 	c.WaitSync()
 

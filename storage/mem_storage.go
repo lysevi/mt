@@ -11,7 +11,7 @@ type MemoryStorage struct {
 	max_time Time
 	cblocks  []*CompressedBlock
 	archive  []*CompressedBlock
-	lock     sync.Mutex
+	lock     sync.RWMutex
 }
 
 func NewMemoryStorage(sz int64) *MemoryStorage {
@@ -97,8 +97,8 @@ func (c *MemoryStorage) Read(ids []Id, from, to Time) []Meas {
 	return c.ReadFltr(ids, 0, from, to)
 }
 func (c *MemoryStorage) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.lock.RLock()
+	defer c.lock.RUnlock()
 	res := []Meas{}
 
 	for _, v := range c.cblocks {
