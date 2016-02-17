@@ -8,6 +8,8 @@ import (
 
 var _ = fmt.Sprintf("")
 
+const OneSecond = time.Duration(1) * time.Second
+
 func TestIntegrationCompressedBlock(t *testing.T) {
 	cblock := NewCompressedBlock()
 	iterations := 5000
@@ -56,8 +58,29 @@ func TestIntegrationMemoryStorage(t *testing.T) {
 		Val *= 2
 	}
 	elapsed := time.Since(startTime)
-	const OneSecond = time.Duration(1) * time.Second
 
+	if elapsed > (OneSecond) {
+		t.Error("so slow: ", elapsed)
+	}
+}
+
+func TestIntegrationStorage(t *testing.T) {
+	storage := NewStorage()
+	iterations := 500000
+	tm := Time(1)
+	var Val int64 = 1
+
+	startTime := time.Now()
+	for i := 0; i < iterations; i++ {
+		storage.Add(NewMeas(1, tm+Time(10), Val, Flag(0x002202)))
+		storage.Add(NewMeas(2, tm+Time(250), Val, Flag(0x1)))
+		storage.Add(NewMeas(3, tm+Time(1000), Val, Flag(0x002202)))
+		storage.Add(NewMeas(4, tm+Time(4000), Val, Flag(0x002202)))
+		tm = tm + Time(4000)
+		Val *= 2
+	}
+	storage.Close()
+	elapsed := time.Since(startTime)
 	if elapsed > (OneSecond) {
 		t.Error("so slow: ", elapsed)
 	}
