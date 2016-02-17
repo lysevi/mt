@@ -10,8 +10,7 @@ var _ = fmt.Sprintf("")
 type MemoryStorage struct {
 	max_time Time
 	cblocks  []*CompressedBlock
-
-	lock sync.RWMutex
+	lock     sync.Mutex
 }
 
 func NewMemoryStorage(sz int64) *MemoryStorage {
@@ -77,20 +76,21 @@ func (c *MemoryStorage) Read(ids []Id, from, to Time) []Meas {
 	return c.ReadFltr(ids, 0, from, to)
 }
 func (c *MemoryStorage) ReadFltr(ids []Id, flg Flag, from, to Time) []Meas {
-	c.lock.RLock()
+	c.lock.Lock()
 	res := []Meas{}
 
 	for _, v := range c.cblocks {
 		subres := v.ReadFltr(ids, flg, from, to)
 		res = append(res, subres...)
 	}
-	c.lock.RUnlock()
+	c.lock.Unlock()
 	return res
 }
 
 func (c *MemoryStorage) TimePoint(ids []Id, time Time) []Meas {
 	return c.Read(ids, 0, time)
 }
+
 func (c *MemoryStorage) TimePointFltr(ids []Id, flg Flag, time Time) []Meas {
 	return c.ReadFltr(ids, flg, 0, time)
 }

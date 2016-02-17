@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 )
 
+var _ = fmt.Sprintf("")
 func TestMemoryStorageAddSingle(t *testing.T) {
 	lc := NewMemoryStorage(200)
 	lc.Add(NewMeas(11, 3, 3, 2))
@@ -52,15 +54,25 @@ func TestMemoryStorageThreads(t *testing.T) {
 		storage.Add_range(meases)
 
 	}
+	f_reader := func(count int, storage *MemoryStorage, wg *sync.WaitGroup, stop *bool) {
+		for {
+			_ = storage.ReadAll()
+			if *stop {
+				break
+			}
+		}
+	}
+	var stop bool = false
 	const write_count = 1000
 	wg := sync.WaitGroup{}
+	go f_reader(100, lc, &wg, &stop)
 	wg.Add(1)
 	go f(1, write_count, lc, &wg)
 	wg.Add(1)
 	go f_range(6, write_count, lc, &wg)
 
 	wg.Wait()
-
+	stop = true
 	all := lc.ReadAll()
 
 	if len(lc.cblocks) != 2 {
