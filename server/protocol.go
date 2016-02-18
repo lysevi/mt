@@ -6,12 +6,14 @@ import (
 )
 
 const (
-	helloFromClient = "***"
+	helloFromClient = "+**"
 	helloFromServer = "+++\n"
-	disconnect      = "Bye!\n"
+	disconnect      = "+Bye!\n"
 	errorMsg        = "-\n"
-	ping            = "ping\n"
-	pong            = "pong\n"
+	ping            = "+ping\n"
+	pong            = "+pong\n"
+	ok              = "+ok"
+	query           = "+query"
 )
 
 func toBytes(s string) []byte {
