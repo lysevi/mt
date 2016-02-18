@@ -27,17 +27,23 @@ func TestStorageCheck(t *testing.T) {
 
 func TestStorageCacheSync(t *testing.T) {
 	lc := NewStorage()
-	writes_count := defaultCacheSize * 2
+	writes_count := defaultCacheSize * 3
 	writes := 0
 	for i := 0; i < writes_count; i++ {
 		m := NewMeas(1, Time(i), int64(i), Flag(i))
 		lc.Add(m)
 		writes++
+		if i == writes_count/2 {
+			all := lc.ReadAll()
+			if len(all) != writes {
+				t.Error("storage readall error: ", len(all), writes)
+			}
+		}
 	}
 
 	all := lc.ReadAll()
 	if len(all) != writes {
-		t.Error("storage readall error: ", len(all), writes_count)
+		t.Error("storage readall error: ", len(all), writes)
 	}
 	lc.Close()
 }
