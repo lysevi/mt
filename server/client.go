@@ -10,6 +10,10 @@ import (
 
 var _ = fmt.Sprintf("")
 
+const (
+	clientReadTimeOut = (time.Duration(300) * time.Millisecond)
+)
+
 type Client struct {
 	conn         net.Conn
 	close_ch     chan interface{}
@@ -45,9 +49,9 @@ func (c *Client) Disconnect() {
 
 func (c *Client) client_worker() {
 	c.is_connected = true
-	c.conn.SetDeadline(time.Now().Add(time.Duration(100) * time.Millisecond))
-	defer c.conn.Close()
 
+	defer c.conn.Close()
+	buf := make([]byte, 1024, 1024)
 	for {
 		select {
 		case <-c.close_ch:
@@ -59,7 +63,8 @@ func (c *Client) client_worker() {
 			}
 		default:
 		}
-		buf := make([]byte, 1024, 1024)
+		c.conn.SetDeadline(time.Now().Add(clientReadTimeOut))
+
 		n, err := c.conn.Read(buf)
 
 		if err != nil && !c.is_closed {
