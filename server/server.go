@@ -94,7 +94,7 @@ L:
 			break L
 		default:
 		}
-		log.Println("server: pings")
+		//log.Println("server: pings")
 		for i := range s.clients {
 			if time.Since(s.clients[i].pingTime) > pingPeriod {
 				log.Println("server: ping to ", s.clients[i].conn.LocalAddr().String())
