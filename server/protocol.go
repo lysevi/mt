@@ -7,9 +7,9 @@ import (
 const (
 	helloFromClient = "+++"
 	helloFromServer = "+++"
-
-	ping = "ping"
-	pong = "pong"
+	errorMsg        = "-"
+	ping            = "ping"
+	pong            = "pong"
 )
 
 func toBytes(s string) []byte {
@@ -19,11 +19,13 @@ func toBytes(s string) []byte {
 type ClientAction interface {
 	Ping()
 	SendName()
+	Error(msg string) //server send info about error
 }
 
 type ServerAction interface {
 	Pong()
 	SayHello()
+	Error(msg string) //client send info about error
 }
 
 type ProtocolServer struct {
@@ -48,6 +50,10 @@ func (p *ProtocolServer) OnRecv(message []byte) error {
 	if reflect.DeepEqual(message, toBytes(pong)) {
 		p.sa.Pong()
 	}
+
+	if len(message) > 0 && string(message)[0] == '-' {
+		p.sa.Error(string(message))
+	}
 	return nil
 }
 
@@ -64,6 +70,10 @@ func (p *ProtocolClient) OnRecv(message []byte) error {
 
 	if reflect.DeepEqual(message, toBytes(ping)) {
 		p.ca.Ping()
+	}
+
+	if len(message) > 0 && string(message)[0] == '-' {
+		p.ca.Error(string(message))
 	}
 	return nil
 }
