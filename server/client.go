@@ -1,19 +1,21 @@
 package server
 
 import (
-	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"sync"
+	"time"
 )
 
 var _ = fmt.Sprintf("")
 
 type Client struct {
 	conn         net.Conn
+	close_ch     chan interface{}
 	is_closed    bool
 	is_connected bool
-	wg           sync.WaitGroup
+	wg           *sync.WaitGroup
 }
 
 func Connect(con_str string) (*Client, error) {
@@ -21,37 +23,58 @@ func Connect(con_str string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	res := Client{}
+	res := &Client{}
 	res.conn = conn
 	res.is_closed = false
 	res.is_connected = false
+	res.close_ch = make(chan interface{})
+	res.wg = &sync.WaitGroup{}
+	fmt.Println("add!")
 	res.wg.Add(1)
 	go res.client_worker()
-	return &res, nil
+	return res, nil
 }
-
+func (c *Client) onClose() {
+	c.is_connected = false
+}
 func (c *Client) Disconnect() {
 	c.is_closed = true
-	c.conn.Close()
+	c.close_ch <- true
 	c.wg.Wait()
 }
 
 func (c *Client) client_worker() {
-	reader := bufio.NewReader(c.conn)
+	c.is_connected = true
+	c.conn.SetDeadline(time.Now().Add(time.Duration(100) * time.Millisecond))
+	defer c.conn.Close()
+
 	for {
-		res, err := reader.ReadString('\n')
-		c.is_connected = true
+		select {
+		case <-c.close_ch:
+			{
+				fmt.Println("client: stopChanel")
+				c.wg.Done()
+				c.onClose()
+				break
+			}
+		default:
+		}
+		buf := make([]byte, 1024, 1024)
+		n, err := c.conn.Read(buf)
+
 		if err != nil && !c.is_closed {
-			fmt.Println("client: error ", err)
+			opErr, ok := err.(*net.OpError)
+			if ok && (opErr.Timeout() || opErr.Err == io.EOF) {
+				continue
+			}
+			fmt.Println("client: error ", c.is_closed, err)
+			c.onClose()
 			break
 		} else {
-			if !c.is_closed {
-				fmt.Println("client: recv ", res)
-			} else {
-				break
+			if !c.is_closed && n != 0 {
+				fmt.Println("client: recv n: ", n, " buf:", string(buf))
 			}
 		}
 	}
-	c.is_connected = false
-	c.wg.Done()
+	fmt.Println("client done")
 }

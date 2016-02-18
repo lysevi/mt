@@ -69,5 +69,5 @@ func (s *Server) on_connect(conn net.Conn) {
 	fmt.Println("server: on_connect")
 	s.Connects++
 	conn.Write([]byte("+++\n"))
-	conn.Close()
+	//conn.Close()
 }

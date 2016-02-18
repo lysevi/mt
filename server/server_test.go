@@ -1,8 +1,10 @@
 package server
 
 import (
+	"fmt"
 	"sync"
 	"testing"
+	"time"
 )
 
 func TestServerStartStop(t *testing.T) {
@@ -46,12 +48,14 @@ func TestServerConnect(t *testing.T) {
 			break
 		}
 	}
+	time.Sleep(time.Duration(500) * time.Millisecond)
 
 	client.Disconnect()
 
 	if client.is_connected || !client.is_closed {
 		t.Error("client close error: ", client.is_connected, client.is_closed)
 	}
+	fmt.Println("server stop")
 	serv.Stop()
 
 }
