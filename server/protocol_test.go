@@ -10,6 +10,7 @@ const (
 	mok_action_say_hello int = 1 << iota
 	mok_action_send_name int = 1 << iota
 	mok_action_error     int = 1 << iota
+	mok_action_discon    int = 1 << iota
 )
 
 type mok_ServerActions struct {
@@ -21,16 +22,21 @@ type mok_ClientActions struct {
 	msg        string
 }
 
-func (s *mok_ServerActions) Pong() {
+func (s *mok_ServerActions) Pong(ci *ClientInfo) {
 	s.lastAction = mok_action_pong
 }
-func (s *mok_ServerActions) SayHello() {
+func (s *mok_ServerActions) SayHello(ci *ClientInfo, buf []byte) {
 	s.lastAction = mok_action_say_hello
+	s.msg = string(buf)
 }
 
-func (s *mok_ServerActions) Error(msg string) {
+func (s *mok_ServerActions) Error(ci *ClientInfo, msg string) {
 	s.lastAction = mok_action_error
 	s.msg = msg
+}
+
+func (s *mok_ServerActions) Disconnect(ci *ClientInfo) {
+	s.lastAction = mok_action_discon
 }
 
 func (s *mok_ClientActions) Ping() {
@@ -51,7 +57,7 @@ func TestProtocol(t *testing.T) {
 	sp := NewServerProtocol(&sa)
 	cp := NewClientProtocol(&ca)
 
-	sp.OnRecv([]byte(helloFromClient))
+	sp.OnRecv(nil, []byte(helloFromClient+" test"))
 	if sa.lastAction != mok_action_say_hello {
 		t.Error(sa.lastAction, mok_action_say_hello)
 	}
@@ -61,7 +67,7 @@ func TestProtocol(t *testing.T) {
 		t.Error(ca.lastAction, mok_action_send_name)
 	}
 
-	sp.OnRecv([]byte(pong))
+	sp.OnRecv(nil, []byte(pong))
 	if sa.lastAction != mok_action_pong {
 		t.Error(sa.lastAction, mok_action_pong)
 	}
@@ -76,7 +82,7 @@ func TestProtocol(t *testing.T) {
 		t.Error(ca.lastAction, mok_action_error, sa.msg)
 	}
 
-	sp.OnRecv([]byte(errorMsg))
+	sp.OnRecv(nil, []byte(errorMsg))
 	if sa.lastAction != mok_action_error || sa.msg != errorMsg {
 		t.Error(sa.lastAction, mok_action_error, sa.msg)
 	}

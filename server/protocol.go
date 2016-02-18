@@ -1,15 +1,17 @@
 package server
 
 import (
-	"reflect"
+	"fmt"
+	"strings"
 )
 
 const (
-	helloFromClient = "+++"
-	helloFromServer = "+++"
-	errorMsg        = "-"
-	ping            = "ping"
-	pong            = "pong"
+	helloFromClient = "***"
+	helloFromServer = "+++\n"
+	disconnect      = "Bye!\n"
+	errorMsg        = "-\n"
+	ping            = "ping\n"
+	pong            = "pong\n"
 )
 
 func toBytes(s string) []byte {
@@ -23,9 +25,10 @@ type ClientAction interface {
 }
 
 type ServerAction interface {
-	Pong()
-	SayHello()
-	Error(msg string) //client send info about error
+	Pong(ci *ClientInfo)
+	SayHello(ci *ClientInfo, buf []byte)
+	Error(ci *ClientInfo, msg string) //client send info about error
+	Disconnect(ci *ClientInfo)
 }
 
 type ProtocolServer struct {
@@ -42,19 +45,28 @@ func NewServerProtocol(sa ServerAction) ProtocolServer {
 	return res
 }
 
-func (p *ProtocolServer) OnRecv(message []byte) error {
-	if reflect.DeepEqual(message, toBytes(helloFromClient)) {
-		p.sa.SayHello()
+func (p *ProtocolServer) OnRecv(ci *ClientInfo, message []byte) error {
+	hf_len := len(helloFromClient)
+	if len(message) > hf_len && string(message[:hf_len]) == helloFromClient {
+		p.sa.SayHello(ci, message[hf_len+1:])
+		return nil
 	}
 
-	if reflect.DeepEqual(message, toBytes(pong)) {
-		p.sa.Pong()
+	if string(message) == pong {
+		p.sa.Pong(ci)
+		return nil
 	}
 
 	if len(message) > 0 && string(message)[0] == '-' {
-		p.sa.Error(string(message))
+		p.sa.Error(ci, string(message))
+		return nil
 	}
-	return nil
+
+	if string(message) == disconnect {
+		p.sa.Disconnect(ci)
+		return nil
+	}
+	panic(fmt.Sprintf("ProtocolServer: uncknow command: '%v'", string(message)))
 }
 
 func NewClientProtocol(ca ClientAction) ProtocolClient {
@@ -64,16 +76,20 @@ func NewClientProtocol(ca ClientAction) ProtocolClient {
 }
 
 func (p *ProtocolClient) OnRecv(message []byte) error {
-	if reflect.DeepEqual(message, toBytes(helloFromServer)) {
+	if string(message) == helloFromServer {
 		p.ca.SendName()
+		return nil
 	}
 
-	if reflect.DeepEqual(message, toBytes(ping)) {
+	if strings.Compare(string(message), ping) == 0 {
 		p.ca.Ping()
+		return nil
 	}
 
 	if len(message) > 0 && string(message)[0] == '-' {
 		p.ca.Error(string(message))
+		return nil
 	}
-	return nil
+
+	panic(fmt.Sprint("ProtocolClient: unknow command: ", string(message)))
 }

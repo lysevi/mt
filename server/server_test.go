@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -37,7 +36,7 @@ func TestServerConnect(t *testing.T) {
 		return
 	}
 
-	client, err := Connect("localhost:8080")
+	client, err := Connect("test", "localhost:8080")
 	if err != nil {
 		t.Error("client connect error")
 		return
@@ -51,11 +50,10 @@ func TestServerConnect(t *testing.T) {
 	time.Sleep(time.Duration(500) * time.Millisecond)
 
 	client.Disconnect()
-
 	if client.is_connected || !client.is_closed {
 		t.Error("client close error: ", client.is_connected, client.is_closed)
 	}
-	fmt.Println("server stop")
+
 	serv.Stop()
 
 }
