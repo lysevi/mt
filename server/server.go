@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strings"
 	"sync"
 	"time"
 )
@@ -134,7 +135,7 @@ L:
 			continue
 		}
 
-		log.Printf("server: recv: '%v'", string(buf[:n]))
+		log.Printf("server: recv: '%v'", strings.Replace(string(buf[:n]), "\n", "<", -1))
 		protocol.OnRecv(ci, buf[:n])
 	}
 	s.workers_wg.Done()
@@ -157,7 +158,7 @@ func (s *Server) Pong(ci *ClientInfo) {
 
 func (s *Server) SayHello(ci *ClientInfo, buf []byte) {
 	log.Println("server: say hello")
-	ci.name = string(buf)
+	ci.name = strings.Replace(string(buf), "\n", "<", -1)
 	log.Printf("server: hello %v, id=%d", ci.name, ci.id)
 
 }

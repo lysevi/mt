@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strings"
 	"sync"
 	"time"
 )
@@ -85,7 +86,7 @@ L:
 		} else {
 			if !c.is_closed && n != 0 {
 				sb := string(buf[:n])
-				log.Println("client: recv n: ", n, " buf:", sb)
+				log.Println("client: recv n: ", n, " buf:", strings.Replace(string(sb), "\n", "<", -1))
 				protocol.OnRecv(buf[:n])
 
 			}
