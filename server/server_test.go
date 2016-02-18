@@ -42,12 +42,16 @@ func TestServerConnect(t *testing.T) {
 	}
 
 	for {
-		if serv.Connects == 1 {
+		if serv.Connects == 1 && client.is_connected {
 			break
 		}
 	}
 
 	client.Disconnect()
+
+	if client.is_connected || !client.is_closed {
+		t.Error("client close error: ", client.is_connected, client.is_closed)
+	}
 	serv.Stop()
 
 }
