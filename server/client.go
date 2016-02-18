@@ -35,6 +35,7 @@ func (c *Client) Disconnect() {
 	c.conn.Close()
 	c.wg.Wait()
 }
+
 func (c *Client) client_worker() {
 	reader := bufio.NewReader(c.conn)
 	for {
@@ -42,7 +43,7 @@ func (c *Client) client_worker() {
 		c.is_connected = true
 		if err != nil && !c.is_closed {
 			fmt.Println("client: error ", err)
-			return
+			break
 		} else {
 			if !c.is_closed {
 				fmt.Println("client: recv ", res)
