@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"sync"
+	//	"sync"
 	"time"
 )
 
@@ -22,9 +22,7 @@ type ClientInfo struct {
 	stop_worker chan interface{}
 	name        string
 	stoped      bool
-	mutex       sync.Mutex
-	out         []*IOData
-
+	//	mutex       sync.Mutex
 	queryes int
 }
 
@@ -42,12 +40,6 @@ func NewClientInfo(conn net.Conn) *ClientInfo {
 
 func (c *ClientInfo) String() string {
 	return fmt.Sprintf("{id:%v name:'%v'}", c.id, c.name)
-}
-
-func (c *ClientInfo) addData(d *IOData) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	c.out = append(c.out, d)
 }
 
 func (c *ClientInfo) NewQuery(queryClient *ClientInfo, buf []byte) {
