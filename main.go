@@ -15,15 +15,17 @@ func main() {
 	serv := server.NewServer(":8080")
 	serv.Start()
 
-	go func() {
-		_, err := server.Connect("main.go", "localhost:8080")
+	f := func(name string) {
+		conn, err := server.Connect(name, "localhost:8080")
 		if err != nil {
 			panic(err)
 		}
+		conn.SendQuery([]byte("test query 1"))
+		conn.SendQuery([]byte("test query 2"))
+	}
 
-		for {
-		}
-	}()
+	go f("client 1")
+	go f("client 2")
 
 	for {
 	}

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"sync"
 	"testing"
 	"time"
@@ -55,5 +56,26 @@ func TestServerConnect(t *testing.T) {
 	}
 
 	serv.Stop()
+}
 
+func TestServerClientQuerys(t *testing.T) {
+	serv := NewServer(":8080")
+	serv.Start()
+
+	f := func(name string) {
+		conn, err := Connect(name, "localhost:8080")
+		if err != nil {
+			panic(err)
+		}
+		conn.SendQuery([]byte("test query 1"))
+		conn.SendQuery([]byte("test query 2"))
+		log.Println("client: ", name, " end")
+		conn.Disconnect()
+	}
+
+	go f("client 1")
+	go f("client 2")
+
+	time.Sleep(time.Duration(2) * time.Second)
+	serv.Stop()
 }

@@ -11,6 +11,7 @@ const (
 	mok_action_send_name int = 1 << iota
 	mok_action_error     int = 1 << iota
 	mok_action_discon    int = 1 << iota
+	mok_action_newquery  int = 1 << iota
 )
 
 type mok_ServerActions struct {
@@ -22,21 +23,30 @@ type mok_ClientActions struct {
 	msg        string
 }
 
-func (s *mok_ServerActions) Pong(ci *ClientInfo) {
+func (s *mok_ServerActions) Pong(ci *ClientInfo) bool {
 	s.lastAction = mok_action_pong
+	return false
 }
-func (s *mok_ServerActions) SayHello(ci *ClientInfo, buf []byte) {
+func (s *mok_ServerActions) SayHello(ci *ClientInfo, buf []byte) bool {
 	s.lastAction = mok_action_say_hello
 	s.msg = string(buf)
+	return false
 }
 
-func (s *mok_ServerActions) Error(ci *ClientInfo, msg string) {
+func (s *mok_ServerActions) Error(ci *ClientInfo, msg string) bool {
 	s.lastAction = mok_action_error
 	s.msg = msg
+	return false
 }
 
-func (s *mok_ServerActions) Disconnect(ci *ClientInfo) {
+func (s *mok_ServerActions) Disconnect(ci *ClientInfo) bool {
 	s.lastAction = mok_action_discon
+	return false
+}
+
+func (s *mok_ServerActions) NewQuery(ci *ClientInfo, buf []byte) bool {
+	s.lastAction = mok_action_newquery
+	return false
 }
 
 func (s *mok_ClientActions) Ping() {
@@ -85,5 +95,10 @@ func TestProtocol(t *testing.T) {
 	sp.OnRecv(nil, []byte(errorMsg))
 	if sa.lastAction != mok_action_error || sa.msg != errorMsg {
 		t.Error(sa.lastAction, mok_action_error, sa.msg)
+	}
+
+	sp.OnRecv(nil, []byte(queryRequest+" qwerty"))
+	if sa.lastAction != mok_action_newquery {
+		t.Error(sa.lastAction, mok_action_error)
 	}
 }

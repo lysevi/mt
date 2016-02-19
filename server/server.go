@@ -73,7 +73,6 @@ func (s *Server) net_worker() {
 		if err != nil {
 			if x, ok := err.(*net.OpError); ok && x.Op == "accept" { // We're done
 				s.is_work = false
-				s.workers_wg.Done()
 				break
 			}
 
@@ -83,12 +82,14 @@ func (s *Server) net_worker() {
 			go s.on_connect(conn)
 		}
 	}
+	s.workers_wg.Done()
+	log.Println("server: net_worker stoped")
 }
 
 func (s *Server) ping_worker() {
 L:
 	for {
-		time.Sleep(time.Duration(1000) * time.Millisecond)
+		time.Sleep(pingPeriod)
 		select {
 		case <-s.ping_chan:
 			break L
@@ -102,11 +103,12 @@ L:
 			}
 		}
 	}
+	log.Println("server: ping_worker stoped")
 	s.workers_wg.Done()
 }
 
 func (s *Server) client_io_worker(ci *ClientInfo) {
-	log.Println("server: start worker ", ci.conn.LocalAddr().String())
+	//log.Println("server: start worker ", ci.conn.LocalAddr().String())
 	ci.conn.Write([]byte(helloFromServer))
 	buf := make([]byte, 1024, 1024)
 	protocol := NewServerProtocol(s)
@@ -115,7 +117,7 @@ L:
 
 		select {
 		case <-ci.stop_worker:
-			log.Println("server: worker stoping")
+			log.Println("server: client_io_worker stoping")
 			break L
 		default:
 		}
@@ -135,15 +137,19 @@ L:
 			continue
 		}
 
-		log.Printf("server: recv: '%v'", strings.Replace(string(buf[:n]), "\n", "<", -1))
-		protocol.OnRecv(ci, buf[:n])
+		//log.Printf("server: recv: '%v'", strings.Replace(string(buf[:n]), "\n", "<", -1))
+		is_close, _ := protocol.OnRecv(ci, buf[:n])
+		if is_close {
+			s.removeClient(ci)
+			break
+		}
 	}
 	s.workers_wg.Done()
-	log.Println("server: stop worker ", ci.conn.LocalAddr().String())
+	//log.Println("server: stop client_io_worker ", ci.conn.LocalAddr().String())
 }
 
 func (s *Server) on_connect(conn net.Conn) {
-	log.Println("server: on_connect")
+	//	log.Println("server: on_connect")
 	ci := NewClientInfo(conn)
 	s.clients = append(s.clients, ci)
 	s.Connects++
@@ -151,26 +157,58 @@ func (s *Server) on_connect(conn net.Conn) {
 	go s.client_io_worker(ci)
 }
 
-func (s *Server) Pong(ci *ClientInfo) {
-	log.Println("server: pong from ", ci.conn.LocalAddr().String())
+func (s *Server) NewQuery(ci *ClientInfo, buf []byte) bool {
+	query_s := string(buf[len(queryRequest):])
+	var id int32
+	query := make([]byte, 1024, 1024)
+	_, err := fmt.Sscanf(query_s, "%d %s", &id, &query)
+	if err != nil {
+		panic(err)
+	}
+	//log.Println("server: new query ", id, query)
+	for _, v := range s.clients {
+		if v.id == id {
+			go v.NewQuery(ci, buf)
+			return true
+		}
+	}
+	log.Panicf("unknow id: %v", id)
+	return true
+}
+
+func (s *Server) Pong(ci *ClientInfo) bool {
+	log.Println("server: pong from ", ci.String())
 	ci.pingTime = time.Now()
+	return false
 }
 
-func (s *Server) SayHello(ci *ClientInfo, buf []byte) {
-	log.Println("server: say hello")
-	ci.name = strings.Replace(string(buf), "\n", "<", -1)
-	log.Printf("server: hello %v, id=%d", ci.name, ci.id)
-
+func (s *Server) SayHello(ci *ClientInfo, buf []byte) bool {
+	//	log.Println("server: say hello")
+	ci.name = strings.Replace(string(buf), "\n", "", -1)
+	log.Printf("server: hello %v", ci.String())
+	ci.conn.Write([]byte(fmt.Sprintf("%d", ci.id)))
+	return false
 }
 
-func (s *Server) Error(ci *ClientInfo, msg string) {
+func (s *Server) Error(ci *ClientInfo, msg string) bool {
 	log.Panicln(fmt.Sprint("server: error ", msg))
+	return true
 }
 
-func (s *Server) Disconnect(ci *ClientInfo) {
-	log.Println("server: disconnect ", ci.conn.LocalAddr())
+func (s *Server) Disconnect(ci *ClientInfo) bool {
+	log.Println("server: disconnect ", ci.String())
 	s.workers_wg.Add(1)
 	defer s.workers_wg.Done()
+
+	s.removeClient(ci)
+
+	ci.stoped = true
+	close(ci.stop_worker)
+	log.Println("server: clients after ", len(s.clients))
+	return false
+}
+
+func (s *Server) removeClient(ci *ClientInfo) {
 	pos := -1
 	for i, v := range s.clients {
 		if v.id == ci.id {
@@ -179,12 +217,8 @@ func (s *Server) Disconnect(ci *ClientInfo) {
 		}
 	}
 	if pos == -1 {
-		log.Panicf("server: client not found id=%d", ci.id)
+		log.Panicf("server: client not found id=%d", ci.String())
+	} else {
+		s.clients = append(s.clients[:pos], s.clients[pos+1:]...)
 	}
-
-	s.clients = append(s.clients[:pos], s.clients[pos+1:]...)
-	ci.stoped = true
-	close(ci.stop_worker)
-	log.Println("server: clients ", len(s.clients))
-
 }
