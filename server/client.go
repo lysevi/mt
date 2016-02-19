@@ -156,6 +156,7 @@ func (c *Client) SendQuery(query []byte) ([]byte, error) {
 	n, err := conn.Read(buf)
 
 	conn.Write([]byte(fmt.Sprintf("%s %d %s \n", queryRequest, c.id, string(query))))
+
 	answ_reader := bufio.NewReader(conn)
 
 	result := []byte{}
@@ -188,7 +189,7 @@ func (c *Client) SendQuery(query []byte) ([]byte, error) {
 func (c *Client) WriteValues(values []Value) error {
 	qw := NewQueryWrite()
 	qw.Values = values
-	json_string, err := qw.JSON()
+	json_string, err := qw.bytes()
 	if err != nil {
 		panic(fmt.Sprintf("json error: %v", err))
 	}
@@ -202,7 +203,7 @@ func (c *Client) ReadValues(from, to storage.Time) ([]Value, error) {
 	qr := NewQueryRead()
 	qr.From = from
 	qr.To = to
-	json_string, err := qr.JSON()
+	json_string, err := qr.bytes()
 	if err != nil {
 		panic(fmt.Sprintf("json error: %v", err))
 	}

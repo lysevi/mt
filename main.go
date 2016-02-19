@@ -39,10 +39,12 @@ func main() {
 			panic(err)
 		}
 		*start = time.Now()
-		for i := 0; i < 1000; i++ {
-			vals := []server.Value{{Id: 0, Time: storage.Time(i), Value: int64(i), Flag: 0xff}}
-			conn.WriteValues(vals)
+		vals := []server.Value{}
+		for i := 0; i < 24; i++ {
+			v := server.Value{Id: 0, Time: storage.Time(i), Value: int64(i), Flag: 0xff}
+			vals = append(vals, v)
 		}
+		conn.WriteValues(vals)
 		*elapsed = time.Now().Sub(*start)
 
 		conn.Disconnect()

@@ -8,8 +8,11 @@ import (
 )
 
 const (
-	queryWrite = "write"
-	queryRead  = "read"
+	queryWriteKind = "write"
+	queryReadKind  = "read"
+
+	queryWrite = 1 << iota
+	queryRead  = iota
 )
 
 type Value struct {
@@ -32,23 +35,23 @@ type QueryWrite struct {
 
 func NewQueryWrite() *QueryWrite {
 	res := &QueryWrite{}
-	res.Kind = queryWrite
+	res.Kind = queryWriteKind
 	return res
 }
 
 func NewQueryRead() *QueryRead {
 	res := &QueryRead{}
-	res.Kind = queryRead
+	res.Kind = queryReadKind
 	return res
 }
 
-func (q QueryWrite) JSON() ([]byte, error) {
+func (q QueryWrite) bytes() ([]byte, error) {
 	res, err := json.Marshal(q)
 	//log.Println("marshal: ", q, string(res))
 	return res, err
 }
 
-func (q QueryRead) JSON() ([]byte, error) {
+func (q QueryRead) bytes() ([]byte, error) {
 	res, err := json.Marshal(q)
 	return res, err
 }

@@ -53,7 +53,7 @@ func (c *ClientInfo) NewQuery(queryClient *ClientInfo, buf []byte) {
 	//TODO rewrite
 	qwrite := QueryWrite{}
 	err := json.Unmarshal(buf, &qwrite)
-	if err == nil && qwrite.Kind == queryWrite {
+	if err == nil && qwrite.Kind == queryWriteKind {
 		log.Println("server: write ", qwrite.Values)
 		for _, v := range qwrite.Values {
 			c.serv.Store.Add(storage.NewMeas(v.Id, v.Time, v.Value, v.Flag))
@@ -63,7 +63,7 @@ func (c *ClientInfo) NewQuery(queryClient *ClientInfo, buf []byte) {
 
 	qread := QueryRead{}
 	err = json.Unmarshal(buf, &qread)
-	if err == nil && qread.Kind == queryRead {
+	if err == nil && qread.Kind == queryReadKind {
 		log.Println("server: read ", qread)
 		read_res := c.serv.Store.Read([]storage.Id{}, qread.From, qread.To)
 
@@ -81,6 +81,6 @@ func (c *ClientInfo) NewQuery(queryClient *ClientInfo, buf []byte) {
 	}
 
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("%v %v ", err, string(buf)))
 	}
 }
