@@ -16,7 +16,8 @@ import (
 var _ = fmt.Sprintf("")
 
 const (
-	pingPeriod = time.Duration(500) * time.Millisecond
+	pingPeriod         = time.Duration(500) * time.Millisecond
+	serverWriteTimeout = time.Duration(1) * time.Second
 )
 
 type Server struct {
@@ -28,6 +29,7 @@ type Server struct {
 	clients    []*ClientInfo
 	ping_chan  chan interface{}
 	Store      *storage.Storage
+	writer     *Writer
 }
 
 func NewServer(port string) Server {
@@ -37,6 +39,7 @@ func NewServer(port string) Server {
 	s.Connects = 0
 	s.ping_chan = make(chan interface{})
 	s.Store = storage.NewStorage()
+	s.writer = NewWriter(s.Store)
 	return s
 }
 
@@ -50,12 +53,14 @@ func (s *Server) Start() error {
 	}
 	s.workers_wg.Add(1)
 	go s.net_worker()
-	//go s.ping_worker()
+	s.workers_wg.Add(1)
+	go s.ping_worker()
 	return nil
 }
 
 func (s *Server) Stop() {
 	log.Println("server: stoping ")
+	s.writer.Stop()
 	close(s.ping_chan)
 	s.listen.Close()
 	for i := range s.clients {
@@ -90,11 +95,13 @@ func (s *Server) net_worker() {
 }
 
 func (s *Server) ping_worker() {
+	log.Println("server: ping_worker start")
 L:
 	for {
 		time.Sleep(pingPeriod)
 		select {
 		case <-s.ping_chan:
+			log.Println("server: ping_chan")
 			break L
 		default:
 		}
@@ -140,7 +147,7 @@ L:
 			continue
 		}
 
-		//log.Printf("server: recv: '%v'", strings.Replace(string(buf[:n]), "\n", "<", -1))
+		log.Printf("server: recv: '%v'", strings.Replace(string(buf[:n]), "\n", "<", -1))
 		is_close, _ := protocol.OnRecv(ci, buf[:n])
 		if is_close {
 			s.removeClient(ci)
@@ -169,17 +176,25 @@ func (s *Server) NewQuery(ci *ClientInfo, buf []byte) bool {
 	if err != nil {
 		panic(err)
 	}
-
-	reader := bufio.NewReader(ci.conn)
-	for i := 0; i < 4; i++ {
-		bts, _ := reader.ReadBytes('\n')
-		//		log.Println("server: ", string(bts))
-		if IsOk(bts) {
-			break
+	{
+		reader := bufio.NewReader(ci.conn)
+		for {
+			bts, err := reader.ReadBytes('\n')
+			opErr, ok := err.(*net.OpError)
+			if ok && opErr.Timeout() {
+				continue
+			}
+			if err != nil {
+				panic(err)
+			}
+			log.Println("server: ", string(bts))
+			if IsOk(bts) {
+				break
+			}
+			query = append(query, bts...)
 		}
-		query = append(query, bts...)
 	}
-	//log.Println("server: new query ", id, string(query))
+	log.Println("server: new query ", id, string(query))
 	for _, v := range s.clients {
 		if v.id == id {
 			go v.NewQuery(ci, query)

@@ -56,9 +56,16 @@ func (c *ClientInfo) NewQuery(queryClient *ClientInfo, buf []byte) {
 	if err == nil && qwrite.Kind == queryWriteKind {
 		log.Println("server: write ", len(qwrite.Values), " values")
 		for _, v := range qwrite.Values {
-			c.serv.Store.Add(storage.NewMeas(v.Id, v.Time, v.Value, v.Flag))
+			c.serv.writer.addValue(v)
 		}
-		queryClient.conn.Write([]byte(ok))
+		log.Println("server: +++ ok")
+
+		n, wrerr := queryClient.conn.Write([]byte(ok))
+		if n != len(ok) || wrerr != nil {
+			panic(wrerr)
+		}
+		log.Println("server: write end")
+		return
 	}
 
 	qread := QueryRead{}
@@ -78,6 +85,8 @@ func (c *ClientInfo) NewQuery(queryClient *ClientInfo, buf []byte) {
 			queryClient.conn.Write([]byte(answer_str))
 			queryClient.conn.Write([]byte(ok))
 		}
+		log.Println("server read end")
+		return
 	}
 
 	if err != nil {

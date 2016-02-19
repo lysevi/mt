@@ -1,12 +1,13 @@
 package server
 
 import (
-	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net"
+	"strings"
 	"sync"
 	"time"
 
@@ -17,7 +18,7 @@ var _ = fmt.Sprintf("")
 
 const (
 	clientReadTimeOut  = (time.Duration(300) * time.Millisecond)
-	clientQueryTimeout = (time.Duration(60) * time.Second)
+	clientQueryTimeout = (time.Duration(3) * time.Second)
 )
 
 type Client struct {
@@ -86,8 +87,8 @@ func (c *Client) readnet() ([]byte, error) {
 		return nil, err
 	} else {
 		if !c.is_closed && n != 0 {
-			//sb := string(buf[:n])
-			//log.Println("client: recv n: ", n, " buf:", strings.Replace(string(sb), "\n", "<", -1))
+			sb := string(buf[:])
+			log.Println("client: recv n: ", n, " buf:", strings.Replace(string(sb), "\n", "<", -1))
 			return buf[:n], nil
 		}
 	}
@@ -155,34 +156,40 @@ func (c *Client) SendQuery(query []byte) ([]byte, error) {
 	buf := make([]byte, 1024, 1024)
 	n, err := conn.Read(buf)
 
+	conn.SetReadDeadline(time.Now().Add(clientQueryTimeout))
 	conn.Write([]byte(fmt.Sprintf("%s %d %s \n", queryRequest, c.id, string(query))))
 	conn.Write([]byte(ok))
-	answ_reader := bufio.NewReader(conn)
 
 	result := []byte{}
 
-	for {
-		conn.SetReadDeadline(time.Now().Add(clientQueryTimeout))
-		bts, err := answ_reader.ReadBytes(byte('\n'))
+L:
+	for i := 0; ; i++ {
+		log.Println("client: i:", i)
+		buf := make([]byte, 1024, 1024)
+		n, err = conn.Read(buf)
 
-		//n, err = conn.Read(buf)
-		opErr, ok := err.(*net.OpError)
-		if ok && (opErr.Timeout() || opErr.Err == io.EOF) {
-			panic("query timeout")
-		}
-
-		if IsError(bts) {
-			panic(fmt.Sprintf("query error: ", string(bts[:n])))
-		} else {
-			if IsOk(bts) {
-				//log.Println("client: query end")
-				break
+		breader := bytes.NewBuffer(buf)
+	SUB:
+		for {
+			bts, err := breader.ReadBytes('\n')
+			if err == io.EOF {
+				break SUB
+			}
+			log.Println("client: recv ", string(bts), len(bts), err)
+			if IsError(bts) {
+				panic(fmt.Sprintf("query error: ", string(bts[:n])))
 			} else {
-				log.Println("client: query data  ", string(bts[:len(bts)-1]))
-				result = append(result, bts...)
+				if IsOk(bts) {
+					log.Println("client: query end")
+					break L
+				} else {
+					log.Println("client: query data  ", string(bts[:len(bts)-1]))
+					result = append(result, bts...)
+				}
 			}
 		}
 	}
+	log.Println("client: query result: ", len(result))
 	return result, nil
 }
 
