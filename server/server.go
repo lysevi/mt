@@ -13,7 +13,7 @@ import (
 var _ = fmt.Sprintf("")
 
 const (
-	pingPeriod = time.Duration(5) * time.Second
+	pingPeriod = time.Duration(500) * time.Millisecond
 )
 
 type Server struct {
