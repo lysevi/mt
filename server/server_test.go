@@ -7,6 +7,18 @@ import (
 	"time"
 )
 
+type EmptyLogger int
+
+func (c EmptyLogger) Write(p []byte) (n int, err error) {
+	return len(p), nil
+}
+
+var emptyLogWriter EmptyLogger
+
+func init() {
+	log.SetOutput(emptyLogWriter)
+}
+
 func TestServerStartStop(t *testing.T) {
 	serv := NewServer("")
 	wg := sync.WaitGroup{}
@@ -69,7 +81,6 @@ func TestServerClientQuerys(t *testing.T) {
 		}
 		conn.SendQuery([]byte("test query 1"))
 		conn.SendQuery([]byte("test query 2"))
-		log.Println("client: ", name, " end")
 		conn.Disconnect()
 	}
 
