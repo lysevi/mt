@@ -20,6 +20,10 @@ func toBytes(s string) []byte {
 	return []byte(s)
 }
 
+func IsHelloFromServer(message []byte) bool {
+	return string(message) == helloFromServer
+}
+
 func IsOk(message []byte) bool {
 	return strings.Compare(string(message), ok) == 0
 }
@@ -87,7 +91,7 @@ func NewClientProtocol(ca ClientAction) *ProtocolClient {
 }
 
 func (p *ProtocolClient) OnRecv(message []byte) error {
-	if string(message) == helloFromServer {
+	if IsHelloFromServer(message) {
 		p.ca.SendName()
 		return nil
 	}

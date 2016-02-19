@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -148,22 +149,32 @@ func (c *Client) SendQuery(query []byte) (QueryResult, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	conn.Write([]byte(fmt.Sprintf("%s %d %s \n", queryRequest, c.id, string(query))))
-
-	conn.SetDeadline(time.Now().Add(clientQueryTimeout))
 	buf := make([]byte, 1024, 1024)
 	n, err := conn.Read(buf)
-	opErr, ok := err.(*net.OpError)
-	if ok && (opErr.Timeout() || opErr.Err == io.EOF) {
-		panic("query timeout")
-	}
 
-	buf = buf[:n]
-	if IsError(buf) {
-		panic(fmt.Sprintf("query error: ", string(buf[:n])))
-	} else {
-		log.Println("client: query accepted")
+	conn.Write([]byte(fmt.Sprintf("%s %d %s \n", queryRequest, c.id, string(query))))
+	answ_reader := bufio.NewReader(conn)
+
+	for {
+		conn.SetDeadline(time.Now().Add(clientQueryTimeout))
+		bts, err := answ_reader.ReadBytes(byte('\n'))
+
+		//n, err = conn.Read(buf)
+		opErr, ok := err.(*net.OpError)
+		if ok && (opErr.Timeout() || opErr.Err == io.EOF) {
+			panic("query timeout")
+		}
+
+		if IsError(bts) {
+			panic(fmt.Sprintf("query error: ", string(bts[:n])))
+		} else {
+			if IsOk(bts) {
+				log.Println("client: query end")
+				break
+			} else {
+				log.Println("client: query data  ", string(bts[:len(bts)-1]))
+			}
+		}
 	}
 	return QueryResult{}, nil
 }
