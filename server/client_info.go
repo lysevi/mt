@@ -21,7 +21,7 @@ type ClientInfo struct {
 	id          int32
 	conn        net.Conn
 	pingTime    time.Time
-	stop_worker chan interface{}
+	stop_worker chan int
 	name        string
 	stoped      bool
 	//	mutex       sync.Mutex
@@ -33,7 +33,7 @@ func NewClientInfo(conn net.Conn, serv *Server) *ClientInfo {
 	res := ClientInfo{}
 	res.conn = conn
 	res.pingTime = time.Now()
-	res.stop_worker = make(chan interface{})
+	res.stop_worker = make(chan int)
 	res.id = client_num
 	res.name = "error name"
 	res.stoped = false
@@ -90,6 +90,7 @@ func (c *ClientInfo) NewQuery(queryClient *ClientInfo, buf []byte) {
 	}
 
 	if err != nil {
-		panic(fmt.Sprintf("%v: %v ", err, string(buf)))
+		msg := fmt.Sprintf("%v: %v ", err, string(buf))
+		queryClient.conn.Write([]byte(msg))
 	}
 }

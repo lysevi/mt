@@ -21,15 +21,16 @@ const (
 )
 
 type Server struct {
-	is_work    bool
-	workers_wg sync.WaitGroup
-	port       string
-	listen     net.Listener
-	Connects   uint32
-	clients    []*ClientInfo
-	ping_chan  chan interface{}
-	Store      *storage.Storage
-	writer     *Writer
+	is_work     bool
+	workers_wg  sync.WaitGroup
+	port        string
+	listen      net.Listener
+	Connects    uint32
+	clients     []*ClientInfo
+	ping_chan   chan interface{}
+	Store       *storage.Storage
+	writer      *Writer
+	client_lock sync.Mutex
 }
 
 func NewServer(port string) Server {
@@ -59,10 +60,14 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) Stop() {
-	log.Println("server: stoping ")
+	log.Println("server STOP begin")
+	s.client_lock.Lock()
+	defer s.client_lock.Unlock()
+	log.Println("server: stop lock ")
 	s.writer.Stop()
-	close(s.ping_chan)
+	s.ping_chan <- 1
 	s.listen.Close()
+	log.Println("server: stop clients: ", len(s.clients))
 	for i := range s.clients {
 		log.Println("server: close ", s.clients[i].name)
 		s.clients[i].stop_worker <- 1
@@ -113,12 +118,13 @@ L:
 			}
 		}
 	}
-	log.Println("server: ping_worker stoped")
 	s.workers_wg.Done()
+	log.Println("server: ping_worker stoped")
+
 }
 
 func (s *Server) client_io_worker(ci *ClientInfo) {
-	//log.Println("server: start worker ", ci.conn.LocalAddr().String())
+	log.Println("server: start worker ", ci.conn.LocalAddr().String())
 	ci.conn.Write([]byte(helloFromServer))
 	buf := make([]byte, 1024, 1024)
 	protocol := NewServerProtocol(s)
@@ -127,11 +133,12 @@ L:
 
 		select {
 		case <-ci.stop_worker:
+			ci.stoped = true
 			log.Println("server: client_io_worker stoping")
 			break L
 		default:
 		}
-		ci.conn.SetDeadline(time.Now().Add(time.Duration(500) * time.Millisecond))
+		ci.conn.SetDeadline(time.Now().Add(time.Duration(100) * time.Millisecond))
 		n, err := ci.conn.Read(buf)
 		if err != nil {
 			opErr, ok := err.(*net.OpError)
@@ -150,12 +157,13 @@ L:
 		log.Printf("server: recv: '%v'", strings.Replace(string(buf[:n]), "\n", "<", -1))
 		is_close, _ := protocol.OnRecv(ci, buf[:n])
 		if is_close {
+			log.Println("server: stop from worker ", ci.String())
 			s.removeClient(ci)
-			break
+			break L
 		}
 	}
 	s.workers_wg.Done()
-	//log.Println("server: stop client_io_worker ", ci.conn.LocalAddr().String())
+	log.Println("server: stop client_io_worker ", ci.String())
 }
 
 func (s *Server) on_connect(conn net.Conn) {
@@ -225,16 +233,14 @@ func (s *Server) Error(ci *ClientInfo, msg string) bool {
 }
 
 func (s *Server) Disconnect(ci *ClientInfo) bool {
+	s.client_lock.Lock()
+	defer s.client_lock.Unlock()
 	log.Println("server: disconnect ", ci.String())
-	s.workers_wg.Add(1)
-	defer s.workers_wg.Done()
 
-	s.removeClient(ci)
-
+	log.Println("server: disconnect ", ci.String(), " removed")
 	ci.stoped = true
-	close(ci.stop_worker)
-	log.Println("server: clients after ", len(s.clients))
-	return false
+	s.Connects--
+	return true
 }
 
 func (s *Server) removeClient(ci *ClientInfo) {

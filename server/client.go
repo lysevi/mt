@@ -164,10 +164,14 @@ func (c *Client) SendQuery(query []byte) ([]byte, error) {
 
 L:
 	for i := 0; ; i++ {
+		if i > 1000 {
+			break
+
+		}
 		log.Println("client: i:", i)
 		buf := make([]byte, 1024, 1024)
 		n, err = conn.Read(buf)
-
+		log.Println("client: sendQuery recv ", string(buf[:n]))
 		breader := bytes.NewBuffer(buf)
 	SUB:
 		for {
