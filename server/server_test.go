@@ -1,7 +1,7 @@
 package server
 
 import (
-	_ "log"
+	"log"
 	"sync"
 	"testing"
 )
@@ -15,7 +15,7 @@ func (c emptyLogger) Write(p []byte) (n int, err error) {
 var el emptyLogger
 
 func init() {
-	//	log.SetOutput(el)
+	log.SetOutput(el)
 }
 
 func TestServerStartStop(t *testing.T) {
@@ -74,59 +74,59 @@ func TestServerConnect(t *testing.T) {
 	serv.Stop()
 }
 
-//func TestServerClientQuerys(t *testing.T) {
-//	serv := NewServer(":8080")
-//	serv.Start()
-//	wg := sync.WaitGroup{}
-//	wg.Add(1)
-//	f := func(name string, w *sync.WaitGroup) {
-//		conn, err := Connect(name, "localhost:8080")
-//		if err != nil {
-//			panic(err)
-//		}
-//		conn.SendQuery([]byte("test query 1"))
-//		//conn.SendQuery([]byte("test query 2"))
-//		conn.Disconnect()
-//		log.Println("********************")
-//		w.Done()
-//	}
+func TestServerClientQuerys(t *testing.T) {
+	serv := NewServer(":8080")
+	serv.Start()
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	f := func(name string, w *sync.WaitGroup) {
+		conn, err := Connect(name, "localhost:8080")
+		if err != nil {
+			panic(err)
+		}
+		conn.SendQuery([]byte("test query 1"))
+		//conn.SendQuery([]byte("test query 2"))
+		conn.Disconnect()
+		log.Println("********************")
+		w.Done()
+	}
 
-//	go f("client 1", &wg)
-//	//go f("client 2")
+	go f("client 1", &wg)
+	//go f("client 2")
 
-//	wg.Wait()
-//	serv.Stop()
-//}
+	wg.Wait()
+	serv.Stop()
+}
 
-//func TestServerClientWrite(t *testing.T) {
-//	serv := NewServer(":8080")
-//	serv.Start()
-//	wg := sync.WaitGroup{}
-//	wg.Add(1)
-//	f := func(name string, w *sync.WaitGroup) {
-//		conn, err := Connect(name, "localhost:8080")
-//		if err != nil {
-//			panic(err)
-//		}
-//		vals := []Value{{Id: 0, Time: 1, Value: 1, Flag: 0xff},
-//			{Id: 1, Time: 3, Value: 11, Flag: 0xff},
-//			{Id: 0, Time: 12, Value: 1, Flag: 0xff}}
-//		conn.WriteValues(vals)
-//		log.Println("test::    read")
-//		res, err := conn.ReadValues(0, 12)
-//		if err != nil || len(res) != len(vals) {
-//			t.Error("read error ", err)
-//		}
-//		conn.Disconnect()
-//		log.Println("test: client end")
-//		w.Done()
-//	}
+func TestServerClientWrite(t *testing.T) {
+	serv := NewServer(":8080")
+	serv.Start()
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	f := func(name string, w *sync.WaitGroup) {
+		conn, err := Connect(name, "localhost:8080")
+		if err != nil {
+			panic(err)
+		}
+		vals := []Value{{Id: 0, Time: 1, Value: 1, Flag: 0xff},
+			{Id: 1, Time: 3, Value: 11, Flag: 0xff},
+			{Id: 0, Time: 12, Value: 1, Flag: 0xff}}
+		conn.WriteValues(vals)
+		log.Println("test::    read")
+		res, err := conn.ReadValues(0, 12)
+		if err != nil || len(res) != len(vals) {
+			t.Error("read error ", err)
+		}
+		conn.Disconnect()
+		log.Println("test: client end")
+		w.Done()
+	}
 
-//	go f("client 1", &wg)
+	go f("client 1", &wg)
 
-//	wg.Wait()
-//	log.Println("!!!!!!!!!!!!!!!!!!!! ")
-//	//time.Sleep(time.Duration(10) * time.Second)
+	wg.Wait()
+	log.Println("!!!!!!!!!!!!!!!!!!!! ")
+	//time.Sleep(time.Duration(10) * time.Second)
 
-//	serv.Stop()
-//}
+	serv.Stop()
+}

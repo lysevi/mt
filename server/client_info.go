@@ -90,7 +90,7 @@ func (c *ClientInfo) NewQuery(queryClient *ClientInfo, buf []byte) {
 	}
 
 	if err != nil {
-		msg := fmt.Sprintf("%v: %v ", err, string(buf))
+		msg := fmt.Sprintf("-error: %v: %v \n", err, string(buf))
 		queryClient.conn.Write([]byte(msg))
 	}
 }

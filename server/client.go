@@ -148,7 +148,7 @@ func (c *Client) Error(msg string) {
 	log.Panicln(fmt.Sprint("server: error ", msg))
 }
 
-func (c *Client) SendQuery(query []byte) ([]byte, error) {
+func (c *Client) SendQuery(query []byte) (result []byte, res_e error) {
 	conn, err := net.Dial("tcp", c.conn_str)
 	if err != nil {
 		return nil, err
@@ -160,8 +160,7 @@ func (c *Client) SendQuery(query []byte) ([]byte, error) {
 	conn.Write([]byte(fmt.Sprintf("%s %d %s \n", queryRequest, c.id, string(query))))
 	conn.Write([]byte(ok))
 
-	result := []byte{}
-
+	res_e = nil
 L:
 	for i := 0; ; i++ {
 		if i > 1000 {
@@ -181,9 +180,13 @@ L:
 			}
 			log.Println("client: recv ", string(bts), len(bts), err)
 			if IsError(bts) {
-				panic(fmt.Sprintf("query error: ", string(bts[:n])))
+				log.Printf("client: query error: %v", string(bts[:n]))
+				break L
 			} else {
-				if IsOk(bts) {
+				if IsOk(bts) || IsError(bts) {
+					if IsError(bts) {
+						res_e = fmt.Errorf("client: send query error %v", bts)
+					}
 					log.Println("client: query end")
 					break L
 				} else {
