@@ -110,13 +110,13 @@ L:
 			break L
 		default:
 		}
-
-		for i := range s.clients {
-			if time.Since(s.clients[i].pingTime) > pingPeriod {
-				log.Println("server: ping to ", s.clients[i].conn.LocalAddr().String())
-				s.clients[i].conn.Write([]byte(ping))
-			}
-		}
+		//TODO restore
+		//		for i := range s.clients {
+		//			if time.Since(s.clients[i].pingTime) > pingPeriod {
+		//				log.Println("server: ping to ", s.clients[i].conn.LocalAddr().String())
+		//				s.clients[i].conn.Write([]byte(ping))
+		//			}
+		//		}
 	}
 	s.workers_wg.Done()
 	log.Println("server: ping_worker stoped")
