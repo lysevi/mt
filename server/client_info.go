@@ -43,7 +43,7 @@ func (c *ClientInfo) String() string {
 }
 
 func (c *ClientInfo) NewQuery(queryClient *ClientInfo, buf []byte) {
-	log.Println("server: new query ", c.String(), "Q=", string(buf[:len(buf)-1]))
 	c.queryes++
+	log.Println("server: new query ", c.String(), "Q=", string(buf[:len(buf)-1]))
 	queryClient.conn.Write([]byte(ok))
 }
