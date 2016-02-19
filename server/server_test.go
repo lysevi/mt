@@ -78,7 +78,7 @@ func TestServerClientQuerys(t *testing.T) {
 	serv := NewServer(":8080")
 	serv.Start()
 	wg := sync.WaitGroup{}
-	wg.Add(1)
+	wg.Add(2)
 	f := func(name string, w *sync.WaitGroup) {
 		conn, err := Connect(name, "localhost:8080")
 		if err != nil {
@@ -92,7 +92,7 @@ func TestServerClientQuerys(t *testing.T) {
 	}
 
 	go f("client 1", &wg)
-	//go f("client 2")
+	go f("client 2", &wg)
 
 	wg.Wait()
 	serv.Stop()
