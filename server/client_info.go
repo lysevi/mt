@@ -50,6 +50,7 @@ func (c *ClientInfo) NewQuery(queryClient *ClientInfo, buf []byte) {
 	c.queryes++
 	log.Println("server: new query ", c.String(), "Q=", string(buf))
 
+	//TODO rewrite
 	qwrite := QueryWrite{}
 	err := json.Unmarshal(buf, &qwrite)
 	if err == nil && qwrite.Kind == queryWrite {
