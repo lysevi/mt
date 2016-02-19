@@ -2,12 +2,15 @@ package server
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"sync"
 	"time"
+
+	"github.com/lysevi/mt/storage"
 )
 
 var _ = fmt.Sprintf("")
@@ -144,7 +147,7 @@ func (c *Client) Error(msg string) {
 	log.Panicln(fmt.Sprint("server: error ", msg))
 }
 
-func (c *Client) SendQuery(query []byte) (QueryResult, error) {
+func (c *Client) SendQuery(query []byte) ([]byte, error) {
 	conn, err := net.Dial("tcp", c.conn_str)
 	if err != nil {
 		return nil, err
@@ -154,6 +157,8 @@ func (c *Client) SendQuery(query []byte) (QueryResult, error) {
 
 	conn.Write([]byte(fmt.Sprintf("%s %d %s \n", queryRequest, c.id, string(query))))
 	answ_reader := bufio.NewReader(conn)
+
+	result := []byte{}
 
 	for {
 		conn.SetDeadline(time.Now().Add(clientQueryTimeout))
@@ -169,12 +174,43 @@ func (c *Client) SendQuery(query []byte) (QueryResult, error) {
 			panic(fmt.Sprintf("query error: ", string(bts[:n])))
 		} else {
 			if IsOk(bts) {
-				log.Println("client: query end")
+				//log.Println("client: query end")
 				break
 			} else {
 				log.Println("client: query data  ", string(bts[:len(bts)-1]))
+				result = append(result, bts...)
 			}
 		}
 	}
-	return QueryResult{}, nil
+	return result, nil
+}
+
+func (c *Client) WriteValues(values []Value) error {
+	qw := NewQueryWrite()
+	qw.Values = values
+	json_string, err := qw.JSON()
+	if err != nil {
+		panic(fmt.Sprintf("json error: %v", err))
+	}
+	//log.Println("client: ", string(json_string), err)
+
+	_, err = c.SendQuery(json_string)
+	return err
+}
+
+func (c *Client) ReadValues(from, to storage.Time) ([]Value, error) {
+	qr := NewQueryRead()
+	qr.From = from
+	qr.To = to
+	json_string, err := qr.JSON()
+	if err != nil {
+		panic(fmt.Sprintf("json error: %v", err))
+	}
+	//log.Println("client: ", string(json_string), err)
+
+	answer, err := c.SendQuery(json_string)
+	log.Println("client: answer ", string(answer))
+	var values []Value
+	err = json.Unmarshal(answer, &values)
+	return values, err
 }

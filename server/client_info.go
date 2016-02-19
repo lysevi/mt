@@ -1,11 +1,13 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
-	//	"sync"
 	"time"
+
+	"github.com/lysevi/mt/storage"
 )
 
 var client_num int32 = 1
@@ -24,9 +26,10 @@ type ClientInfo struct {
 	stoped      bool
 	//	mutex       sync.Mutex
 	queryes int
+	serv    *Server
 }
 
-func NewClientInfo(conn net.Conn) *ClientInfo {
+func NewClientInfo(conn net.Conn, serv *Server) *ClientInfo {
 	res := ClientInfo{}
 	res.conn = conn
 	res.pingTime = time.Now()
@@ -34,6 +37,7 @@ func NewClientInfo(conn net.Conn) *ClientInfo {
 	res.id = client_num
 	res.name = "error name"
 	res.stoped = false
+	res.serv = serv
 	client_num++
 	return &res
 }
@@ -44,10 +48,38 @@ func (c *ClientInfo) String() string {
 
 func (c *ClientInfo) NewQuery(queryClient *ClientInfo, buf []byte) {
 	c.queryes++
-	log.Println("server: new query ", c.String(), "Q=", string(buf[:len(buf)-1]))
-	queryClient.conn.Write([]byte("test answer 1\n"))
-	queryClient.conn.Write([]byte("test answer 2\n"))
-	queryClient.conn.Write([]byte("test answer 3\n"))
-	queryClient.conn.Write([]byte(ok))
+	log.Println("server: new query ", c.String(), "Q=", string(buf))
 
+	qwrite := QueryWrite{}
+	err := json.Unmarshal(buf, &qwrite)
+	if err == nil && qwrite.Kind == queryWrite {
+		log.Println("server: write ", qwrite.Values)
+		for _, v := range qwrite.Values {
+			c.serv.Store.Add(storage.NewMeas(v.Id, v.Time, v.Value, v.Flag))
+		}
+		queryClient.conn.Write([]byte(ok))
+	}
+
+	qread := QueryRead{}
+	err = json.Unmarshal(buf, &qread)
+	if err == nil && qread.Kind == queryRead {
+		log.Println("server: read ", qread)
+		read_res := c.serv.Store.Read([]storage.Id{}, qread.From, qread.To)
+
+		answer := []Value{}
+		for _, v := range read_res {
+			answer = append(answer, Value{Id: v.Id, Value: v.Value, Time: v.Tstamp})
+		}
+
+		answer_json, err := json.Marshal(answer)
+		if err == nil {
+			answer_str := fmt.Sprintf("%s\n", string(answer_json))
+			queryClient.conn.Write([]byte(answer_str))
+			queryClient.conn.Write([]byte(ok))
+		}
+	}
+
+	if err != nil {
+		panic(err)
+	}
 }

@@ -2,31 +2,57 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"sync"
+	"time"
 
 	"github.com/lysevi/mt/server"
-	//	"github.com/lysevi/mt/storage"
+	"github.com/lysevi/mt/storage"
 	//"github.com/pkg/profile"
 )
 
+type emptyLogger int
+
+func (c emptyLogger) Write(p []byte) (n int, err error) {
+	return len(p), nil
+}
+
+var el emptyLogger
+
+func init() {
+	log.SetOutput(el)
+}
+
 func main() {
 	//defer profile.Start().Stop()
-	fmt.Println("****************")
+	log.Println("****************")
 
 	serv := server.NewServer(":8080")
 	serv.Start()
-
-	f := func(name string) {
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	start_time := time.Now()
+	var elapsed_time time.Duration
+	f := func(name string, start *time.Time, elapsed *time.Duration) {
 		conn, err := server.Connect(name, "localhost:8080")
 		if err != nil {
 			panic(err)
 		}
-		conn.SendQuery([]byte("test query 1"))
-		conn.SendQuery([]byte("test query 2"))
+		*start = time.Now()
+		for i := 0; i < 1000; i++ {
+			vals := []server.Value{{Id: 0, Time: storage.Time(i), Value: int64(i), Flag: 0xff}}
+			conn.WriteValues(vals)
+		}
+		*elapsed = time.Now().Sub(*start)
+
+		conn.Disconnect()
+		wg.Done()
 	}
 
-	go f("client 1")
-	go f("client 2")
+	go f("client 1", &start_time, &elapsed_time)
 
-	for {
-	}
+	wg.Wait()
+	serv.Stop()
+
+	fmt.Println("************ elapsed: ", elapsed_time)
 }

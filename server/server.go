@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/lysevi/mt/storage"
 )
 
 var _ = fmt.Sprintf("")
@@ -23,8 +25,8 @@ type Server struct {
 	listen     net.Listener
 	Connects   uint32
 	clients    []*ClientInfo
-
-	ping_chan chan interface{}
+	ping_chan  chan interface{}
+	Store      *storage.Storage
 }
 
 func NewServer(port string) Server {
@@ -33,6 +35,7 @@ func NewServer(port string) Server {
 	s.port = port
 	s.Connects = 0
 	s.ping_chan = make(chan interface{})
+	s.Store = storage.NewStorage()
 	return s
 }
 
@@ -46,8 +49,7 @@ func (s *Server) Start() error {
 	}
 	s.workers_wg.Add(1)
 	go s.net_worker()
-	s.workers_wg.Add(1)
-	go s.ping_worker()
+	//go s.ping_worker()
 	return nil
 }
 
@@ -150,7 +152,7 @@ L:
 
 func (s *Server) on_connect(conn net.Conn) {
 	//	log.Println("server: on_connect")
-	ci := NewClientInfo(conn)
+	ci := NewClientInfo(conn, s)
 	s.clients = append(s.clients, ci)
 	s.Connects++
 	s.workers_wg.Add(1)
@@ -165,10 +167,10 @@ func (s *Server) NewQuery(ci *ClientInfo, buf []byte) bool {
 	if err != nil {
 		panic(err)
 	}
-	//log.Println("server: new query ", id, query)
+	//log.Println("server: new query ", id, string(query))
 	for _, v := range s.clients {
 		if v.id == id {
-			go v.NewQuery(ci, buf)
+			go v.NewQuery(ci, query)
 			return true
 		}
 	}
