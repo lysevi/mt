@@ -48,13 +48,13 @@ func (c *ClientInfo) String() string {
 
 func (c *ClientInfo) NewQuery(queryClient *ClientInfo, buf []byte) {
 	c.queryes++
-	log.Println("server: new query ", c.String(), "Q=", string(buf))
+	//log.Println("server: new query ", c.String(), "Q=", string(buf))
 
 	//TODO rewrite
 	qwrite := QueryWrite{}
 	err := json.Unmarshal(buf, &qwrite)
 	if err == nil && qwrite.Kind == queryWriteKind {
-		log.Println("server: write ", qwrite.Values)
+		log.Println("server: write ", len(qwrite.Values), " values")
 		for _, v := range qwrite.Values {
 			c.serv.Store.Add(storage.NewMeas(v.Id, v.Time, v.Value, v.Flag))
 		}
@@ -81,6 +81,6 @@ func (c *ClientInfo) NewQuery(queryClient *ClientInfo, buf []byte) {
 	}
 
 	if err != nil {
-		panic(fmt.Sprintf("%v %v ", err, string(buf)))
+		panic(fmt.Sprintf("%v: %v ", err, string(buf)))
 	}
 }

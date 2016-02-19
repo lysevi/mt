@@ -17,7 +17,7 @@ var _ = fmt.Sprintf("")
 
 const (
 	clientReadTimeOut  = (time.Duration(300) * time.Millisecond)
-	clientQueryTimeout = (time.Duration(10) * time.Second)
+	clientQueryTimeout = (time.Duration(60) * time.Second)
 )
 
 type Client struct {
@@ -156,13 +156,13 @@ func (c *Client) SendQuery(query []byte) ([]byte, error) {
 	n, err := conn.Read(buf)
 
 	conn.Write([]byte(fmt.Sprintf("%s %d %s \n", queryRequest, c.id, string(query))))
-
+	conn.Write([]byte(ok))
 	answ_reader := bufio.NewReader(conn)
 
 	result := []byte{}
 
 	for {
-		conn.SetDeadline(time.Now().Add(clientQueryTimeout))
+		conn.SetReadDeadline(time.Now().Add(clientQueryTimeout))
 		bts, err := answ_reader.ReadBytes(byte('\n'))
 
 		//n, err = conn.Read(buf)

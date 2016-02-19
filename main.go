@@ -20,7 +20,7 @@ func (c emptyLogger) Write(p []byte) (n int, err error) {
 var el emptyLogger
 
 func init() {
-	log.SetOutput(el)
+	//log.SetOutput(el)
 }
 
 func main() {
@@ -38,12 +38,13 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		*start = time.Now()
+
 		vals := []server.Value{}
-		for i := 0; i < 24; i++ {
+		for i := 0; i < 100000; i++ {
 			v := server.Value{Id: 0, Time: storage.Time(i), Value: int64(i), Flag: 0xff}
 			vals = append(vals, v)
 		}
+		*start = time.Now()
 		conn.WriteValues(vals)
 		*elapsed = time.Now().Sub(*start)
 

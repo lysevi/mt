@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -160,12 +161,23 @@ func (s *Server) on_connect(conn net.Conn) {
 }
 
 func (s *Server) NewQuery(ci *ClientInfo, buf []byte) bool {
+	//log.Println("server: new query ", string(buf))
 	query_s := string(buf[len(queryRequest):])
 	var id int32
 	query := make([]byte, 1024, 1024)
 	_, err := fmt.Sscanf(query_s, "%d %s", &id, &query)
 	if err != nil {
 		panic(err)
+	}
+
+	reader := bufio.NewReader(ci.conn)
+	for i := 0; i < 4; i++ {
+		bts, _ := reader.ReadBytes('\n')
+		//		log.Println("server: ", string(bts))
+		if IsOk(bts) {
+			break
+		}
+		query = append(query, bts...)
 	}
 	//log.Println("server: new query ", id, string(query))
 	for _, v := range s.clients {
